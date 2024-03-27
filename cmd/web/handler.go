@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
-	"unicode/utf8"
 
 	"html/template"
 	"log"
@@ -47,7 +46,8 @@ func (app *application) verification(w http.ResponseWriter, r *http.Request) {
 	// Fetch user credentials from the database
 	var storedPassword string
 	var role int
-	err = app.ubcs.DB.QueryRow("SELECT password, role FROM LOGIN WHERE username = $1", username).Scan(&storedPassword, &role)
+	var memberID int // Added memberID variable
+	err = app.ubcs.DB.QueryRow("SELECT password, role, memberID FROM LOGIN WHERE username = $1", username).Scan(&storedPassword, &role, &memberID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "Invalid username or password", http.StatusUnauthorized)
@@ -64,20 +64,36 @@ func (app *application) verification(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Fetch first name and last name from PersonnelInfoTable based on memberID
+	var personName string
+	row := app.ubcs.DB.QueryRow("SELECT CONCAT(FName, ' ', LName) FROM PersonnelInfoTable WHERE id = $1 LIMIT 1", memberID)
+	err = row.Scan(&personName)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "User not found in PersonnelInfoTable", http.StatusUnauthorized)
+			return
+		}
+		log.Println(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	// Set PersonName in the application struct
+	app.PersonName = personName
+
 	// Render specific template based on role
 	switch role {
 	case 1: // Assuming role 1 is for normal users
 		http.Redirect(w, r, "/admin", http.StatusSeeOther)
 	case 2: // Assuming role 2 is for admin users
 		http.Redirect(w, r, "/student", http.StatusSeeOther)
-	case 3: // Assuming role 3 is for admin users
+	case 3: // Assuming role 3 is for guard users
 		http.Redirect(w, r, "/guard", http.StatusSeeOther)
-
 	default:
 		http.Error(w, "Invalid role", http.StatusInternalServerError)
 	}
-}
 
+}
 func (app *application) admin(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles("./ui/admin/dashboard.tmpl")
 	if err != nil {
@@ -205,58 +221,66 @@ func (app *application) call(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) createReport(w http.ResponseWriter, r *http.Request) {
+
 	if r.Method != http.MethodPost {
 		http.Redirect(w, r, "/reports", http.StatusSeeOther)
 		return
 	}
+
 	err := r.ParseForm()
 	if err != nil {
-		http.Error(w,
-			http.StatusText(http.StatusBadRequest),
-			http.StatusBadRequest)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 
-	incident_type := r.PostForm.Get("type_of_incident")
+	incidentType := r.PostForm.Get("type_of_incident")
 	location := r.PostForm.Get("location")
 	description := r.PostForm.Get("description")
-	file_path := r.PostForm.Get("file_path")
 	anonymous := r.PostForm.Get("is_anonymous")
-	device_location := r.PostForm.Get("device_location")
+	deviceLocation := r.PostForm.Get("device_location")
 
-	// check the web form fields to valadity
+	// Default personName to Anonymous if anonymous is checked
+	var personName string
+	if anonymous == "on" {
+		personName = "Anonymous"
+	} else {
+		personName = app.PersonName
+	}
+
+	// Check if file_path is provided
+	var filePath string
+	if _, ok := r.PostForm["file_path"]; ok {
+		filePath = r.PostForm.Get("file_path")
+	}
+
+	// check the web form fields for validity
 	errors := make(map[string]string)
 	// check each field
-	if strings.TrimSpace(incident_type) == "" {
+	if incidentType = strings.TrimSpace(incidentType); incidentType == "" {
 		errors["type_of_incident"] = "This field cannot be left blank"
-	} else if utf8.RuneCountInString(incident_type) > 50 {
-		errors["type_of_incident"] = "This field is too long(maximum is 50 characters)"
+	} else if len(incidentType) > 50 {
+		errors["type_of_incident"] = "This field is too long (maximum is 50 characters)"
 	}
-	if strings.TrimSpace(location) == "" {
+	if location = strings.TrimSpace(location); location == "" {
 		errors["location"] = "This field cannot be left blank"
-	} else if utf8.RuneCountInString(location) > 100 {
-		errors["location"] = "This field is too long(maximum is 100 characters)"
+	} else if len(location) > 100 {
+		errors["location"] = "This field is too long (maximum is 100 characters)"
 	}
-	if strings.TrimSpace(description) == "" {
+	if description = strings.TrimSpace(description); description == "" {
 		errors["description"] = "This field cannot be left blank"
-	} else if utf8.RuneCountInString(description) > 255 {
-		errors["description"] = "This field is too long(maximum is 255 characters)"
+	} else if len(description) > 255 {
+		errors["description"] = "This field is too long (maximum is 255 characters)"
 	}
-	if strings.TrimSpace(file_path) == "" {
-		errors["file_path"] = "This field cannot be left blank"
-	} else if utf8.RuneCountInString(file_path) > 255 {
-		errors["file_path"] = "This field is too long(maximum is 255 characters)"
+
+	// Validate filePath if provided
+	if filePath != "" && len(filePath) > 255 {
+		errors["file_path"] = "This field is too long (maximum is 255 characters)"
 	}
-	if strings.TrimSpace(anonymous) == "" {
-		errors["is_anonymous"] = "This field cannot be left blank"
-	} else if utf8.RuneCountInString(anonymous) > 255 {
-		errors["is_anonymous"] = "This field is too long(maximum is 255 characters)"
+
+	if deviceLocation != "" && len(deviceLocation) > 255 {
+		errors["device_location"] = "This field is too long (maximum is 255 characters)"
 	}
-	if strings.TrimSpace(device_location) == "" {
-		errors["device_location"] = "This field cannot be left blank"
-	} else if utf8.RuneCountInString(device_location) > 255 {
-		errors["device_location"] = "This field is too long(maximum is 255 characters)"
-	}
+
 	// check if there are any errors in the map
 	if len(errors) > 0 {
 		fmt.Fprintln(w, "Validation errors:")
@@ -265,12 +289,11 @@ func (app *application) createReport(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	_, err = app.ubcs.Insert(incident_type, location, description, file_path, anonymous, device_location)
+	// Insert the report
+	_, err = app.ubcs.Insert(incidentType, personName, location, description, filePath, deviceLocation)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w,
-			http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	http.Redirect(w, r, "/reports", http.StatusSeeOther)

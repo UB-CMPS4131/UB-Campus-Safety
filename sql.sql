@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS ROLES;
-DROP TABLE IF EXISTS PersonnelInfoTable;
-DROP TABLE IF EXISTS LOGIN;
+DROP TABLE IF EXISTS ROLES CASCADE;
+DROP TABLE IF EXISTS PersonnelInfoTable CASCADE;
+DROP TABLE IF EXISTS LOGIN CASCADE;
 DROP TABLE IF EXISTS Report;
 
 -- Create ROLES table
@@ -17,7 +17,7 @@ CREATE TABLE PersonnelInfoTable (
     Mname VARCHAR(50),
     LName VARCHAR(50) NOT NULL,
     DOB DATE,
-    GENDER VARCHAR(10),
+    GENDER VARCHAR(10)
 );
 
 -- Create LOGIN table
@@ -32,18 +32,19 @@ CREATE TABLE LOGIN (
 
 
 CREATE TABLE Report (
+    report_id SERIAL PRIMARY KEY,
     type_of_incident TEXT NOT NULL,
+    person_name VARCHAR(150), -- Combined field for first name and last name
     location TEXT NOT NULL,
     description TEXT NOT NULL,
-    is_anonymous BOOLEAN NOT NULL,
     device_location TEXT,
-    file_path TEXT
+    file_path bytea
 );
 
 INSERT INTO ROLES (role_name) VALUES ('admin'), ('student'), ('guard');
 
 -- Inserting data with a URL for the image
-INSERT INTO PersonnelInfoTable (image, fname, mname, lname, dob, gender) 
+INSERT INTO PersonnelInfoTable (image, Fname, Mname, LName, DOB, GENDER) 
 VALUES ('https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-computer-icons-software-developer-avatar-child-face-heroes-thumbnail.png', 
         'John', 
         'Alberto', 
@@ -51,7 +52,7 @@ VALUES ('https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-compute
         '1990-01-01', 
         'Male');
 
-INSERT INTO PersonnelInfoTable (image, fname, nname, lname, dob, gender) 
+INSERT INTO PersonnelInfoTable (image, Fname, Mname, LName, DOB, GENDER) 
 VALUES ('https://img.utdstc.com/icon/f47/819/f47819c8d0663a52a0d637b8d137169661d3033c6921d4811318731b8ed426b0:200', 
         'Alex', 
         'Humberto', 
@@ -59,7 +60,7 @@ VALUES ('https://img.utdstc.com/icon/f47/819/f47819c8d0663a52a0d637b8d137169661d
         '2003-03-12', 
         'Male');
 
-INSERT INTO PersonnelInfoTable (image, fname, mname, lname, dob, gender) 
+INSERT INTO PersonnelInfoTable (image, Fname, Mname, LName, DOB, GENDER) 
 VALUES ('https://cdn.iconscout.com/icon/free/png-256/free-avatar-370-456322.png?f=webp', 
         'Michael', 
         'David', 

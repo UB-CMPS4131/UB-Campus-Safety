@@ -15,9 +15,7 @@
 </div>
 <div class="sidebar">
     <div class="app-info">
-        <img src="./ui/images/official_logo.png" alt="App Logo">
-        <h2>UB Campus Safety</h2>
-        <p>Developers Email: alphatech@dev.com</p>
+        <img src="../images/official_logo.png" alt="App Logo">
     </div>
     <div class="menu">
         <ul>
@@ -51,24 +49,31 @@
 </div>
 
 <section>
-<div class="container">
-<form action="/report-add" id="reportform" method="POST"> 
-  <label for="incident_type">Type of Incident:</label><br>
-  <select id="incident_type" name="type_of_incident" onchange="handleIncidentType()">
-    <option value="Theft">Theft</option>
-    <option value="Assault">Assault</option>
-    <option value="Vandalism">Vandalism</option>
-    <option value="Harassment">Harassment</option>
-    <option value="Other">Other</option>
-  </select><br><br>
 
-  <div id="other_incident_type_container" style="display: none;">
-    <label for="other_incident_type">Other Type:</label><br>
-    <input type="text" id="other_incident_type" name="other_incident_type"><br><br>
-  </div>
+
+<div class="container">
+
+<form action="/report-add" id="reportform" method="POST"> 
+<input type="checkbox" id="is-anonymous" name="is_anonymous">
+<label for="is-anonymous">Submit Anonymously</label><br><br>
+
+<label class="form-label" for="incident_type">Type of Incident:</label><br>
+<input class="form-input" list="incident_types" id="incident_type" name="type_of_incident" onchange="handleIncidentType()">
+<datalist id="incident_types">
+    <option value="Theft">
+    <option value="Assault">
+    <option value="Vandalism">
+    <option value="Harassment">
+</datalist><br><br>
+
+
+
   
   <label for="location">Location:</label><br>
   <input type="text" id="location" name="location" required><br><br>
+
+  <input type="checkbox" id="useLocation" name="device_location" onchange="getLocation()">
+  <label for="useLocation">Use Device Location</label><br><br>
 
   <label for="description">Description:</label><br>
   <textarea id="description" name="description" rows="4" cols="50" required></textarea><br><br>
@@ -76,12 +81,7 @@
   <label for="images">Upload Images:</label><br>
   <input type="file" id="images" name="file_path" accept="image/*" multiple><br><br>
 
-  <input type="checkbox" id="is-anonymous" name="is_anonymous">
-  <label for="is-anonymous">Submit Anonymously</label><br><br>
-
-  <input type="checkbox" id="useLocation" name="device_location">
-  <label for="useLocation">Use Device Location</label><br><br>
-
+ 
   <input type="submit" value="Submit" class="buttonSubmit">
 </form>
 </div>

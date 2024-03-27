@@ -10,9 +10,10 @@ type LoginCredentials struct {
 
 type Report struct {
 	TypeOfIncident string
+	PersonName     string
 	Location       string
 	Description    string
 	Anonymous      string
 	DeviceLocation string
-	FilePath       string
+	FilePath       []byte
 }

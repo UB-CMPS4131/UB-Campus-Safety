@@ -38,7 +38,8 @@ func setUpDB() (*sql.DB, error) {
 // Dependencies (things/variables)
 // Dependency Injection (passing)
 type application struct {
-	ubcs *postgresql.ConnectModel
+	ubcs       *postgresql.ConnectModel
+	PersonName string
 }
 
 func main() {
