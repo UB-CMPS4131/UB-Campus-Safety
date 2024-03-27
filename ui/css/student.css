@@ -1,0 +1,290 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #333;
+}
+
+.navbar {
+    background-color: #282629;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.nav-icon {
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.sidebar {
+    background-color: #282629;
+    color: white;
+    width: 275px;
+    height: 100vh;
+    position: fixed;
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 2;
+}
+
+.sidebar.active {
+    transform: translateX(0);
+}
+
+.sidebar.active + section {
+    overflow: hidden;
+}
+
+
+.app-info {
+    text-align: center;
+    padding: 20px;
+}
+
+.app-info img {
+    width: 205px;
+    height: 200px;
+    border-radius: 100%;
+}
+
+.menu ul {
+    list-style: none;
+    padding: 0;
+}
+
+.menu li {
+    background-color: #9D4BFF;
+    align-items: center;
+    border: 1px solid white;
+    margin-bottom: 5%;
+    width: 80%;
+    margin-left: 15px;
+    border-radius: 10px;
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.menu li:hover {
+    background-color: #555;
+}
+
+.menu ul {
+    list-style: none;
+    padding: 0;
+}
+
+.menu li {
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.menu li a {
+    text-decoration: none;
+    color: white;
+    display: flex;
+    align-items: center;
+}
+
+.activeMenuItem {
+    background-color: #B177A0;
+}
+
+.content {
+    color: #999;
+    margin-left: 0;
+    padding: 20px;
+    z-index: 1;
+}
+
+
+.button {
+    background-color: #000;
+    color: #fff;
+    padding: 10px;
+    width: 100%;
+    text-align: center;
+    border: none;
+}
+
+section {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    background: #333;
+}
+
+button {
+    font-size: 18px;
+    font-weight: 400;
+    color: #fff;
+    padding: 14px 22px;
+    border: none;
+    background: #4070f4;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #265df2;
+}
+
+button.show-modal,
+.modal-box {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+.overlay {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 380px;
+    width: 100%;
+    padding: 30px 20px;
+    border-radius: 24px;
+    background-color: #fff;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+.modal-box i {
+    font-size: 70px;
+    color: #4070f4;
+}
+
+.modal-box h2 {
+    margin-top: 20px;
+    font-size: 25px;
+    font-weight: 500;
+    color: #333;
+}
+
+.modal-box h3 {
+    font-size: 16px;
+    font-weight: 400;
+    color: #333;
+    text-align: center;
+}
+
+.modal-box .buttons {
+    margin-top: 25px;
+}
+
+.modal-box button {
+    font-size: 14px;
+    padding: 6px 12px;
+    margin: 0 10px;
+}
+
+.close-btn {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    flex-grow: 1;
+    margin-left: 1.5em;
+    margin-right: 1.5em;
+    border: none;
+    padding: 1em;
+    border-radius: 0.5em;
+    cursor: pointer;
+    background-color: #F6BE00;
+}
+
+/* Add styles for form elements */
+form {
+    padding: 20px;
+    background-color: #333;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+form label {
+    display: block;
+    margin-bottom: 5px;
+    color: #fff;
+}
+
+form select,
+form input[type="text"],
+form textarea,
+form input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box; /* Ensure padding and border are included in width */
+}
+
+form input[type="checkbox"] {
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+form input[type="submit"] {
+    background-color: #4070f4;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+form input[type="submit"]:hover {
+    background-color: #265df2;
+}
+
+/* Media queries for responsiveness */
+
+@media screen and (min-width: 768px) {
+    .content {
+        margin-left: 260px;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    .sidebar {
+        width: 100%;
+        transform: translateX(-100%);
+        transition: none;
+    }
+    .sidebar.active {
+        transform: translateX(0);
+    }
+}
+
+.upload-btn {
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .upload-btn:hover {
+    background-color: #45a049;
+  }
+  

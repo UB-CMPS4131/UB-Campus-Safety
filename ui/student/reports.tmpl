@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UB Campus Safety App</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="../css/student.css">
+</head>
+<body>
+<div class="navbar">
+    <div class="nav-icon" onclick="toggleSidebar()">☰</div>
+    <div class="selected-item">Reports</div>
+</div>
+<div class="sidebar">
+    <div class="app-info">
+        <img src="./ui/images/official_logo.png" alt="App Logo">
+        <h2>UB Campus Safety</h2>
+        <p>Developers Email: alphatech@dev.com</p>
+    </div>
+    <div class="menu">
+        <ul>
+            <li>
+                <a href="/panic">
+                    <span class="icon">🚨</span> Panic Button
+                </a>
+            </li>
+            <li class="activeMenuItem">
+                <a href="/reports">
+                    <span class= "icon">📊</span> Reports
+                </a>
+            </li>
+            <li>
+                <a href="/call">
+                    <span class= "icon">📞</span> Call
+                </a>
+            </li>
+            <li>
+                <a href="/profile">
+                    <span class="icon">&#128100;</span> Profile
+                </a>
+            </li>
+            <li>
+                <a href="/logout">
+                    <span class="icon">&#x2794;</span> Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<section>
+<div class="container">
+<form action="/report-add" id="reportform" method="POST"> 
+  <label for="incident_type">Type of Incident:</label><br>
+  <select id="incident_type" name="type_of_incident" onchange="handleIncidentType()">
+    <option value="Theft">Theft</option>
+    <option value="Assault">Assault</option>
+    <option value="Vandalism">Vandalism</option>
+    <option value="Harassment">Harassment</option>
+    <option value="Other">Other</option>
+  </select><br><br>
+
+  <div id="other_incident_type_container" style="display: none;">
+    <label for="other_incident_type">Other Type:</label><br>
+    <input type="text" id="other_incident_type" name="other_incident_type"><br><br>
+  </div>
+  
+  <label for="location">Location:</label><br>
+  <input type="text" id="location" name="location" required><br><br>
+
+  <label for="description">Description:</label><br>
+  <textarea id="description" name="description" rows="4" cols="50" required></textarea><br><br>
+
+  <label for="images">Upload Images:</label><br>
+  <input type="file" id="images" name="file_path" accept="image/*" multiple><br><br>
+
+  <input type="checkbox" id="is-anonymous" name="is_anonymous">
+  <label for="is-anonymous">Submit Anonymously</label><br><br>
+
+  <input type="checkbox" id="useLocation" name="device_location">
+  <label for="useLocation">Use Device Location</label><br><br>
+
+  <input type="submit" value="Submit" class="buttonSubmit">
+</form>
+</div>
+</section>
+</body>
+<script src="../js/student.js"></script>
+</html>
