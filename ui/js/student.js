@@ -1,15 +1,37 @@
-function toggleSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    sidebar.classList.toggle('active');
-}
+var li_items = document.querySelectorAll(".sidebar ul li");
+var hamburger = document.querySelector(".hamburger");
+var wrapper = document.querySelector(".wrapper");
 
-// Add an event listener to close the sidebar when clicking outside of it
-document.addEventListener('click', function (event) {
-    const sidebar = document.querySelector('.sidebar');
-    if (sidebar.classList.contains('active') && !event.target.closest('.sidebar') && !event.target.closest('.nav-icon')) {
-        sidebar.classList.remove('active');
-    }
-});
+li_items.forEach((li_item)=>{
+	li_item.addEventListener("mouseenter", ()=>{
+
+			li_item.closest(".wrapper").classList.remove("hover_collapse");
+
+	})
+ 
+})
+
+li_items.forEach((li_item)=>{
+	li_item.addEventListener("mouseleave", ()=>{
+
+			li_item.closest(".wrapper").classList.add("hover_collapse");
+
+	})
+})
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const hamburger = document.querySelector('.hamburger');
+    const wrapper = document.querySelector('.wrapper');
+
+    hamburger.addEventListener('click', function() {
+      wrapper.classList.toggle('hover_collapse');
+      wrapper.classList.toggle('click_collapse');
+    });
+  });
+  
+
 
 const selectImage = document.querySelector('.select-image');
 const inputFile = document.querySelector('#file');

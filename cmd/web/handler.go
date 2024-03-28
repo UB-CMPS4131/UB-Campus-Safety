@@ -29,6 +29,10 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) verification(w http.ResponseWriter, r *http.Request) {
+	var data struct {
+		ErrorMessage string
+	}
+
 	if r.Method != http.MethodPost {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
@@ -36,7 +40,8 @@ func (app *application) verification(w http.ResponseWriter, r *http.Request) {
 
 	err := r.ParseForm()
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		data.ErrorMessage = http.StatusText(http.StatusBadRequest)
+		renderTemplate(w, "./ui/html/login.tmpl", data)
 		return
 	}
 
@@ -48,19 +53,9 @@ func (app *application) verification(w http.ResponseWriter, r *http.Request) {
 	var role int
 	var memberID int // Added memberID variable
 	err = app.ubcs.DB.QueryRow("SELECT password, role, memberID FROM LOGIN WHERE username = $1", username).Scan(&storedPassword, &role, &memberID)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			http.Error(w, "Invalid username or password", http.StatusUnauthorized)
-			return
-		}
-		log.Println(err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-
-	// Validate the password
-	if storedPassword != password {
-		http.Error(w, "Invalid username or password", http.StatusUnauthorized)
+	if err == sql.ErrNoRows || storedPassword != password {
+		data.ErrorMessage = "Invalid username or password"
+		renderTemplate(w, "./ui/html/login.tmpl", data)
 		return
 	}
 
@@ -68,13 +63,9 @@ func (app *application) verification(w http.ResponseWriter, r *http.Request) {
 	var personName string
 	row := app.ubcs.DB.QueryRow("SELECT CONCAT(FName, ' ', LName) FROM PersonnelInfoTable WHERE id = $1 LIMIT 1", memberID)
 	err = row.Scan(&personName)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			http.Error(w, "User not found in PersonnelInfoTable", http.StatusUnauthorized)
-			return
-		}
-		log.Println(err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	if err == sql.ErrNoRows {
+		data.ErrorMessage = "User not found in PersonnelInfoTable"
+		renderTemplate(w, "./ui/html/login.tmpl", data)
 		return
 	}
 
@@ -92,8 +83,26 @@ func (app *application) verification(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, "Invalid role", http.StatusInternalServerError)
 	}
-
 }
+
+func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
+	ts, err := template.ParseFiles(tmpl)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	err = ts.Execute(w, data)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+	}
+}
+
 func (app *application) admin(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles("./ui/admin/dashboard.tmpl")
 	if err != nil {
@@ -113,7 +122,7 @@ func (app *application) admin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) student(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("./ui/student/panic.tmpl")
+	ts, err := template.ParseFiles("./ui/student/reports.tmpl")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -150,6 +159,58 @@ func (app *application) guard(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) reports(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles("./ui/student/reports.tmpl")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	err = ts.Execute(w, nil)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+	}
+}
+
+func (app *application) guard_profile(w http.ResponseWriter, r *http.Request) {
+	ts, err := template.ParseFiles("./ui/guard/guard-profile.tmpl")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	err = ts.Execute(w, nil)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+	}
+}
+func (app *application) admin_profile(w http.ResponseWriter, r *http.Request) {
+	ts, err := template.ParseFiles("./ui/admin/admin-profile.tmpl")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	err = ts.Execute(w, nil)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+	}
+}
+func (app *application) guardreports(w http.ResponseWriter, r *http.Request) {
+	ts, err := template.ParseFiles("./ui/guard/guard-reports.tmpl")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -204,6 +265,96 @@ func (app *application) profile(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) call(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles("./ui/student/call.tmpl")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	err = ts.Execute(w, nil)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+	}
+}
+
+func (app *application) addNewuser(w http.ResponseWriter, r *http.Request) {
+	ts, err := template.ParseFiles("./ui/admin/adduser.tmpl")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	err = ts.Execute(w, nil)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+	}
+}
+
+func (app *application) viewreport(w http.ResponseWriter, r *http.Request) {
+	ts, err := template.ParseFiles("./ui/admin/viewreport.tmpl")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	err = ts.Execute(w, nil)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+	}
+}
+
+func (app *application) view_report(w http.ResponseWriter, r *http.Request) {
+	ts, err := template.ParseFiles("./ui/guard/view-report.tmpl")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	err = ts.Execute(w, nil)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+	}
+}
+
+func (app *application) viewlog(w http.ResponseWriter, r *http.Request) {
+	ts, err := template.ParseFiles("./ui/admin/viewlog.tmpl")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	err = ts.Execute(w, nil)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+	}
+}
+
+func (app *application) checkinout(w http.ResponseWriter, r *http.Request) {
+	ts, err := template.ParseFiles("./ui/guard/checkinout.tmpl")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
