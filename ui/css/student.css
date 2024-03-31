@@ -1,0 +1,255 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Paaji+2:wght@400;600&display=swap');
+
+*{
+font-family: 'Baloo Paaji 2', cursive;
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+list-style: none;
+text-decoration: none;
+}
+
+body{
+background: #f5f5f5;
+}
+.loader {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #333;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  #loading-overlay {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.5);
+    z-index: 9999;
+  }
+  
+
+.top_navbar{
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 60px;
+background: #323233;
+box-shadow: 1px 0 2px rgba(0,0,0,0.125);
+display: flex;
+align-items: center;
+z-index: 100;
+}
+
+.top_navbar .logo{
+width: 350px;
+font-size: 16px;
+font-weight: 700;
+padding: 0 25px;
+color: white;
+letter-spacing: 2px;
+text-transform: uppercase;
+}
+
+
+
+.top_navbar .menu{
+width: calc(20% - 250px);
+padding: 0 25px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.top_navbar .hamburger{
+font-size: 25px;
+cursor: pointer;
+color: white;
+}
+
+.top_navbar .hamburger:hover{
+color: #007dc3;
+}
+
+/* Now I have determined what the sidebar will look like for a responsive device */
+.hover_collapse .sidebar{
+width: 70px;
+}
+
+.hover_collapse .sidebar ul li a .text{
+display: none;
+}
+
+.sidebar{
+position: fixed;
+top: 60px;
+left: 0;
+width: 220px;
+height: 100%;
+background: #042331;
+z-index: 1;
+}
+
+.sidebar ul li a{
+display: block;
+padding: 16px 25px;
+border-bottom: 1px solid #03374e;
+color: #0e94d4;
+
+
+}
+
+.sidebar ul li a .icon{
+font-size: 18px;
+color: white;
+vertical-align: middle;
+
+}
+
+.sidebar ul li a .text{
+margin-left: 19px;
+color: #fff;
+font-family: sans-serif;
+font-size: 18px;
+letter-spacing: 2px;
+}
+@media only screen and (max-width: 768px) {
+    .sidebar {
+      display: none;
+    }
+  
+    .hover_collapse .sidebar {
+      width: auto; /* Adjust width as needed */
+    }
+  
+    .click_collapse .sidebar {
+      display: block;
+      width: 220px; /* Width of the sidebar */
+    }
+  }
+  
+
+.sidebar ul li a:hover{
+background: #0e94d4;
+color: #fff;
+}
+
+.click_collapse .sidebar{
+
+}
+
+/* Updated CSS for the form section */
+
+.container {
+    margin: 140px auto 80px; /* Adjust spacing from the top navbar and the bottom */
+    max-width: 600px; /* Set maximum width for better readability */
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for depth */
+}
+
+.container form {
+    display: flex;
+    flex-direction: column;
+}
+
+.container form label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.container form input[type="text"],
+.container form input[type="file"],
+.container form textarea {
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.container form input[type="checkbox"] {
+    margin-left: 10px;
+    vertical-align: middle; /* Align checkboxes vertically with the text */
+}
+
+.container form label[for="is-anonymous"], /* Target specific labels */
+.container form label[for="useLocation"] {
+    display: inline-block; /* Make labels inline-block */
+    vertical-align: middle; /* Align labels vertically with the checkboxes */
+    margin-bottom: 0; /* Remove bottom margin */
+}
+
+
+.container form .buttonSubmit {
+    padding: 10px 20px;
+    background-color: #007dc3;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.container form .buttonSubmit:hover {
+    background-color: #005f8b;
+}
+
+.login__img {
+    position: relative; /* Change to relative positioning */
+    margin-bottom: 30px; /* Adjust margin to create space between the logo and the form */
+    text-align: center; /* Center the image */
+    
+}
+
+.login__img img {
+    width: 100%; /* Adjust the width to fill the container */
+    max-width: 185px; /* Set maximum width */
+}
+
+
+/* Profile Section Styling */
+
+.profile {
+    margin-top: 80px; /* Adjust spacing from the top navbar */
+    margin-left: 80px; /* Adjust spacing from the sidebar */
+    padding: 20px;
+}
+
+.profile-info {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.profile-info img {
+    display: block;
+    margin: 0 auto 20px; /* Center the image and add space below */
+    width: 150px; /* Set image width */
+    height: 150px; /* Set image height */
+    border-radius: 50%; /* Make the image round */
+    object-fit: cover; /* Ensure the image covers the entire space */
+}
+
+/* Adjustments for smaller screens */
+@media only screen and (max-width: 768px) {
+    .profile {
+        margin-left: 0; /* Remove margin from the left for smaller screens */
+    }
+}
+

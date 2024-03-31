@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Login Panel</title>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <link rel='stylesheet' href='../css/login.css'>
+    <style>
+        .error-message {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <section>
+        <div class="form-box">
+            <div class="login__img">
+                <img src="../images/app_logo-playstore-removebg-preview.png" alt="">
+            </div>
+            <div class="form-value">
+                <form action="/login" method="POST">
+                    <h2>Login</h2>
+                    <div class="inputbox"> <ion-icon name="mail-outline"></ion-icon> <input type="text" name="username" placeholder="Username" required>
+                        <label>Username</label>
+                    </div>
+                    <div class="inputbox"> <ion-icon name="lock-closed-outline"></ion-icon> <input type="password" name="password" placeholder="Password" required> <label>Password</label> </div>
+                    <div class="forget"> <label> <a href="#">Forgot Password</a> </div> <button>Log In</button>
+                    {{ if .ErrorMessage }}
+                    <div class="error-message">{{ .ErrorMessage }}</div>
+                    {{ end }}
+                </form>
+            </div>
+        </div>
+    </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var errorMessage = document.querySelector('.error-message');
+            if (errorMessage) {
+                setTimeout(function() {
+                    errorMessage.remove();
+                }, 2000); // 2 seconds
+            }
+        });
+    </script>
+</body>
+
+</html>

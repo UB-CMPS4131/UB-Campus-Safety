@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Add Report</title>
+
+  <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+  <link rel="stylesheet" href="../css/student.css">
+
+  <style>
+    /* Style for overlay */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+      z-index: 9999; /* Ensure it's on top of everything */
+    }
+
+    /* Style for loading animation */
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrapper hover_collapse">
+  <div class="top_navbar">
+    <div class="menu">
+      <div class="hamburger">
+        <i class="fas fa-bars"></i>
+      </div>
+
+    </div>
+    <div class="logo">UB CAMPUS SAFETY</div>
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar_inner">
+      <ul>
+        <li>
+          <a href="/check-in-out">
+            <span class="icon"><i class="fas fa-calendar-check"></i></span>
+            <span class="text">Check in/out</span>
+          </a>
+        </li>
+        <li>
+          <a href="/guard-reports">
+            <span class="icon"><i class="fas fa-file-upload"></i></span>
+            <span class="text">Add Report</span>
+          </a>
+        </li>
+        <li>
+          <a href="/guard-view-report">
+            <span class="icon"><i class="fa fa-file"></i></span>
+            <span class="text">View Report</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="/guard-profile">
+            <span class="icon"><i class="fa fa-user"></i></span>
+            <span class="text">Profile</span>
+          </a>
+        </li>
+        <li>
+          <a href="/">
+            <span class="icon"><i class="fa fa-arrow-left"></i></span>
+            <span class="text">Logout</span>
+          </a>
+        </li>
+
+
+      </ul>
+    </div>
+  </div>
+</div>
+<section>
+  <div class="container">
+    <div class="login__img">
+      <img src="../images/app_logo-playstore-removebg-preview.png" alt="">
+      <h1>UB Security</h1>
+    </div>
+
+    <form action="/guard-report-add" id="reportform" method="POST" enctype="multipart/form-data">  
+      <label for="is-anonymous">Submit Anonymously <input type="checkbox" id="is-anonymous" name="is_anonymous"></label><br><br>
+
+      <label class="form-label" for="incident_type">Type of Incident:</label><br>
+      <input class="form-input" list="incident_types" id="incident_type" name="type_of_incident" onchange="handleIncidentType()">
+      <datalist id="incident_types">
+          <option value="Theft">
+          <option value="Assault">
+          <option value="Vandalism">
+          <option value="Harassment">
+      </datalist><br><br>
+
+
+
+      <label for="location">Location:</label><br>
+      <input type="text" id="location" name="location" required><br><br>
+
+
+      <label for="useLocation">Use Device Location <input type="checkbox" id="useLocation" name="device_location" onchange="getLocation()"></label><br><br>
+
+      <label for="description">Description:</label><br>
+      <textarea id="description" name="description" rows="4" cols="50" required></textarea><br><br>
+
+      <label for="images">Upload Images:</label><br>
+      <input type="file" id="images" name="file_path" accept="image/*" multiple><br><br>
+
+      <!-- Add overlay for loading animation -->
+      <div class="overlay" id="overlay">
+        <div class="loading">Submitting...</div>
+      </div>
+
+      <input type="submit" value="Submit" class="buttonSubmit" onclick="showLoading()">
+    </form>
+  </div>
+</section>
+
+<script src="../js/student.js"></script>
+
+<script>
+  function showLoading() {
+    // Show overlay with loading animation
+    document.getElementById('overlay').style.display = 'block';
+  }
+
+  // Assuming successful submission redirects to /report
+  window.onload = function() {
+    if (window.location.href.includes('/guard-reports')) {
+      // Hide overlay if redirected to /report
+      document.getElementById('overlay').style.display = 'none';
+      // Change loading text to "Successful"
+      document.querySelector('.loading').innerText = 'Successful';
+    }
+  };
+</script>
+
+</body>
+</html>

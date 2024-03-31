@@ -1,0 +1,162 @@
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", Arial, sans-serif;
+}
+
+section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  background: url("../images/background.jpg") no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+
+.login__img {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.login__img img {
+  width: 100%; /* Adjust the width to fill the container */
+  max-width: 185px; /* Set maximum width */
+}
+
+/* Adjust .form-box to accommodate the logo */
+.form-box {
+  position: relative;
+  width: 90%; /* Adjust width as needed */
+  max-width: 400px; /* Set maximum width */
+  height: 550px; /* Let height adjust automatically */
+  background: transparent;
+  border: none;
+  border-radius: 20px;
+  backdrop-filter: blur(15px) brightness(80%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+h2 {
+  margin-top: 10rem; /* Use rem for better scalability */
+  font-size: 2rem; /* Use rem for better scalability */
+  color: #fff;
+  text-align: center;
+}
+
+.inputbox {
+  position: relative;
+  margin: 2rem 0; /* Use rem for better scalability */
+  width: 90%; /* Adjust width as needed */
+  max-width: 310px; /* Set maximum width */
+  border-bottom: 2px solid #fff;
+}
+
+.inputbox label {
+  position: absolute;
+  top: 50%;
+  left: 5px;
+  transform: translateY(-50%);
+  color: #fff;
+  font-size: 1em;
+  pointer-events: none;
+  transition: 0.5s;
+}
+
+.error-message {
+  color: #ff6347; /* Adjust color for error messages */
+  font-size: 0.9em; /* Adjust font size for error messages */
+  text-align: center; /* Align error messages to the center */
+  margin-top: 1rem; /* Adjust margin-top for error messages */
+}
+
+
+/* animations: start */
+input:focus~label,
+input:valid~label {
+  top: -1rem; /* Use rem for better scalability */
+}
+
+/* animation:end */
+.inputbox input {
+  width: 100%;
+  height: 50px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 1em;
+  padding: 0 35px 0 5px;
+  color: #fff;
+}
+
+.inputbox ion-icon {
+  position: absolute;
+  right: 8px;
+  color: #fff;
+  font-size: 1.2em;
+  top: 20px;
+}
+
+.forget {
+  margin: -0.5rem 0 1rem; /* Use rem for better scalability */
+  font-size: 0.9em;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+}
+
+.forget label input {
+  margin-right: 3px;
+}
+
+.forget a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.forget a:hover {
+  text-decoration: underline;
+}
+
+button {
+  width: 100%;
+  height: 40px;
+  border-radius: 40px;
+  background-color: #fff;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.register {
+  font-size: 0.9em;
+  color: #fff;
+  text-align: center;
+  margin: 1.25rem 0 0.625rem; /* Use rem for better scalability */
+}
+
+.register p a {
+  text-decoration: none;
+  color: #fff;
+  font-weight: 600;
+}
+
+.register p a:hover {
+  text-decoration: underline;
+}
+
+@media screen and (max-width: 768px) {
+  .form-box {
+    width: 90%; /* Adjust width for smaller screens */
+    max-width: 90%; /* Set maximum width */
+  }
+}
