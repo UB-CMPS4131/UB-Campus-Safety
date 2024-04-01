@@ -16,8 +16,10 @@ CREATE TABLE PersonnelInfoTable (
     Fname VARCHAR(50) NOT NULL,
     Mname VARCHAR(50),
     LName VARCHAR(50) NOT NULL,
+    username VARCHAR(50),
     DOB DATE,
-    GENDER VARCHAR(10)
+    GENDER VARCHAR(10),
+    imagedata BYTEA -- Fixed syntax error
 );
 
 -- Create LOGIN table
@@ -38,8 +40,20 @@ CREATE TABLE Report (
     location TEXT NOT NULL,
     description TEXT NOT NULL,
     device_location TEXT,
-    file_path bytea
+    imagename VARCHAR(50),
+    imagedata BYTEA,
+    encodedimagedata TEXT,
+    mime_type VARCHAR(50)
 );
+
+CREATE TABLE log (
+    id SERIAL PRIMARY KEY,
+    person_name VARCHAR(150),
+    log_date DATE NOT NULL,
+    log_time TIME NOT NULL,
+    check_type VARCHAR(8) NOT NULL
+);
+
 
 INSERT INTO ROLES (role_name) VALUES ('admin'), ('student'), ('guard');
 
@@ -52,25 +66,8 @@ VALUES ('https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-compute
         '1990-01-01', 
         'Male');
 
-INSERT INTO PersonnelInfoTable (image, Fname, Mname, LName, DOB, GENDER) 
-VALUES ('https://img.utdstc.com/icon/f47/819/f47819c8d0663a52a0d637b8d137169661d3033c6921d4811318731b8ed426b0:200', 
-        'Alex', 
-        'Humberto', 
-        'Peraza', 
-        '2003-03-12', 
-        'Male');
-
-INSERT INTO PersonnelInfoTable (image, Fname, Mname, LName, DOB, GENDER) 
-VALUES ('https://cdn.iconscout.com/icon/free/png-256/free-avatar-370-456322.png?f=webp', 
-        'Michael', 
-        'David', 
-        'Brown', 
-        '1985-09-20', 
-        'Male');
 
 
 INSERT INTO LOGIN (memberID, username, password, Role, pastPasswords)
 VALUES 
-    (1, 'john_doe', '12345678', 3, ''),
-    (2, '2020152022', '12345678', 2, ''),
-    (3, 'mpit', '12345678', 1, '');
+    (1, 'john_doe', '12345678', 1, '');

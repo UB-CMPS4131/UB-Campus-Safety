@@ -65,18 +65,17 @@
 		</div>
 	</div>
 </div>
- <!-- Profile Display -->
- <div class="profile">
+<div class="profile">
 	<div class="profile-info">
-		<img src="data:image/png;base64,{{.EncodedImage}}" alt="Profile Picture">
+		<!-- Display the profile image -->
+		<img src="data:{{.MimeType}};base64,{{.EncodedImage}}" alt="Profile Picture">
 	  
+		<!-- Display profile information -->
 		<p><strong>First Name:</strong> {{.Fname}}</p>
-		<p><strong>Middles Name:</strong> {{.Mname}}</p>
+		<p><strong>Middle Name:</strong> {{.Mname}}</p>
 		<p><strong>Last Name:</strong> {{.LName}}</p>
 		<p><strong>Date of Birth:</strong> {{.DOB.Format "2006-01-02"}}</p>
 		<p><strong>Gender:</strong> {{.Gender}}</p>
-		
-
 	</div>
 </div>
 

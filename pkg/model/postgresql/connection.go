@@ -26,7 +26,7 @@ func (m *ConnectModel) Insert(incidentType, personName, location, description, i
 	return id, nil
 }
 
-func (m *ConnectModel) NewUser(fname, lastname, middlename, gender, dob string, imagedata []byte, imagename string, usertype int) (int, error) {
+func (m *ConnectModel) NewUser(username, fname, lastname, middlename, gender, dob string, imagedata []byte, imagename string, usertype int) (int, error) {
 	// Check if username already exists
 	usernameExists, err := m.usernameExists(fname + lastname)
 	if err != nil {
@@ -37,11 +37,11 @@ func (m *ConnectModel) NewUser(fname, lastname, middlename, gender, dob string, 
 	}
 
 	var id int
-	s := `INSERT INTO personnelinfotable(fname, mname, lname, dob, gender, image, imagedata)
-          VALUES ($1, $2, $3, $4, $5, $6, $7)
+	s := `INSERT INTO personnelinfotable(username, fname, mname, lname, dob, gender, image, imagedata)
+          VALUES ($1,$2, $3, $4, $5, $6, $7, $8)
           RETURNING id;`
 
-	err = m.DB.QueryRow(s, fname, middlename, lastname, dob, gender, imagename, imagedata).Scan(&id)
+	err = m.DB.QueryRow(s, username, fname, middlename, lastname, dob, gender, imagename, imagedata).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
@@ -49,7 +49,7 @@ func (m *ConnectModel) NewUser(fname, lastname, middlename, gender, dob string, 
 	s = `INSERT INTO login(memberid, username, password, role)
     VALUES ($1, $2, $3, $4)`
 
-	_, err = m.DB.Exec(s, id, fname+lastname, lastname, usertype)
+	_, err = m.DB.Exec(s, id, username, username, usertype)
 	if err != nil {
 		return 0, err
 	}
@@ -162,4 +162,48 @@ func (m *ConnectModel) ReadProfile(username string) ([]*models.Profile, error) {
 		return nil, errors.Wrap(err, "error iterating over rows")
 	}
 	return profile, nil
+}
+
+func (m *ConnectModel) Insertlog(personName, logDate, logTime, checkType string) (int, error) {
+	var id int
+	s := `INSERT INTO log (person_name, log_date, log_time, check_type)
+	VALUES ($1, $2, $3, $4) RETURNING id;`
+
+	err := m.DB.QueryRow(s, personName, logDate, logTime, checkType).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
+func (m *ConnectModel) ReadLog() ([]*models.Log, error) {
+	// Query to fetch the member ID associated with the logged-in user
+
+	// SQL statement to fetch profile for the logged-in user based on their member ID
+	s := `
+    SELECT person_name, log_date, log_time, check_type
+    FROM log
+    `
+	rows, err := m.DB.Query(s)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	log := []*models.Log{}
+
+	for rows.Next() {
+		q := &models.Log{}
+		err = rows.Scan(&q.PersonName, &q.LogDate, &q.LogTime, &q.CheckType)
+		if err != nil {
+			return nil, errors.Wrap(err, "error Scanning row")
+		}
+
+		log = append(log, q)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, errors.Wrap(err, "error iterating over rows")
+	}
+	return log, nil
 }

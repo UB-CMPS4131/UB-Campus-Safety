@@ -13,11 +13,11 @@ import (
 func setUpDB() (*sql.DB, error) {
 	// Provide the credentials for our database
 	const (
-		host     = "castor.db.elephantsql.com"
+		host     = "bubble.db.elephantsql.com"
 		port     = 5432
-		user     = "gyjtdxfb"
-		password = "UmWzPBvrA33jHoZQ9JZNlOxK_cI77wV2"
-		dbname   = "gyjtdxfb"
+		user     = "xqymnerr"
+		password = "Xgtj9QRe3ouBnLW1WN-9C_g4_DDWefMr"
+		dbname   = "xqymnerr"
 	)
 
 	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
@@ -95,6 +95,7 @@ func main() {
 	mux.HandleFunc("/guard-view-report", app.view_report)
 	mux.HandleFunc("/guard-profile", app.guard_profile)
 	mux.HandleFunc("/admin-profile", app.admin_profile)
+	mux.HandleFunc("/create-log", app.createLog)
 
 	log.Println("Starting server on port :8080")
 	err = http.ListenAndServe(":8080", mux)

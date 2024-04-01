@@ -33,3 +33,10 @@ type Profile struct {
 	EncodedImage string
 	MimeType     string
 }
+
+type Log struct {
+	PersonName string
+	LogDate    time.Time
+	LogTime    time.Time
+	CheckType  string
+}

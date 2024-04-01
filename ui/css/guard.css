@@ -153,10 +153,11 @@ section {
   padding: 20px;
 }
 
-section h3 {
+section h2 {
   font-size: 24px;
   color: #333;
   margin-bottom: 20px;
+  text-align: center;
 }
 
 section ul {
@@ -213,3 +214,61 @@ section ul li img {
       margin-left: 0; /* Remove margin from the left for smaller screens */
   }
 }
+
+    /* Updated CSS */
+    section {
+      margin-top: 80px; /* Adjust spacing from the top navbar */
+      margin-left: 80px; /* Adjust spacing from the sidebar */
+      padding: 20px;
+    }
+
+    section h2 {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    section form {
+      max-width: 400px; /* Adjust the maximum width of the form */
+      margin: 0 auto; /* Center the form horizontally */
+    }
+
+    section form label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    section form input[type="date"],
+    section form input[type="time"],
+    section form select,
+    section form input[type="submit"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    section form input[type="submit"] {
+      background-color: #007dc3;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    /* Adjustments for smaller screens */
+    @media only screen and (max-width: 768px) {
+      section {
+        margin-left: 10px; /* Adjust margin-left to provide space for the sidebar */
+        margin-top: 80px; /* Adjust as needed based on the height of your navbar */
+        padding: 20px;
+      }
+    }
+
+    @media only screen and (max-width: 480px) {
+      section {
+        margin-top: 140px; /* Adjust margin-top for smaller screens */
+        padding: 10px; /* Adjust padding for smaller screens */
+      }
+    }

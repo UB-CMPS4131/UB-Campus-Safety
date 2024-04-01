@@ -144,7 +144,7 @@ func (app *application) student(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) guard(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("./ui/guard/dashboard.tmpl")
+	ts, err := template.ParseFiles("./ui/guard/checkinout.tmpl")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -388,7 +388,7 @@ func (app *application) createuser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	usertype := r.FormValue("usertype")
-
+	username := r.FormValue("username")
 	firstname := r.FormValue("fname")
 	middlename := r.FormValue("mname")
 	lastname := r.FormValue("lname")
@@ -413,6 +413,14 @@ func (app *application) createuser(w http.ResponseWriter, r *http.Request) {
 	//checking for errors map
 	errors := make(map[string]string)
 	//validation code
+	if username = strings.TrimSpace(username); username == "" {
+		errors["Username"] = "This Field connat be left"
+	} else if len(firstname) > 25 {
+		errors["Username"] = "This Field is too Long, max lenght is 25 characters"
+	} else if len(firstname) < 3 {
+		errors["Username"] = "This Field is Too short, minimum accepted lenght is 3 characters"
+	}
+
 	if firstname = strings.TrimSpace(firstname); firstname == "" {
 		errors["First Name"] = "This Field connat be left"
 	} else if len(firstname) > 25 {
@@ -439,7 +447,7 @@ func (app *application) createuser(w http.ResponseWriter, r *http.Request) {
 		roleINT = 2
 	} else if usertype == "Admin" {
 		roleINT = 1
-	} else if usertype == "Security" {
+	} else if usertype == "Guard" {
 		roleINT = 3
 	} else {
 		errors["Eser Type"] = "Invalid User Type"
@@ -470,7 +478,7 @@ func (app *application) createuser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = app.ubcs.NewUser(firstname, lastname, middlename, gender, dob, imagedata, imageName, roleINT)
+	_, err = app.ubcs.NewUser(username, firstname, lastname, middlename, gender, dob, imagedata, imageName, roleINT)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -539,6 +547,15 @@ func (app *application) view_report(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) viewlog(w http.ResponseWriter, r *http.Request) {
+	q, err := app.ubcs.ReadLog()
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	// Display the quotes using a template
 	ts, err := template.ParseFiles("./ui/admin/viewlog.tmpl")
 	if err != nil {
 		log.Println(err.Error())
@@ -547,12 +564,14 @@ func (app *application) viewlog(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	err = ts.Execute(w, nil)
+	err = ts.Execute(w, q)
+
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
 			http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -599,21 +618,28 @@ func (app *application) createReport(w http.ResponseWriter, r *http.Request) {
 	} else {
 		personName = app.PersonName
 	}
-	// Get the file from the form
-	file, handler, err := r.FormFile("file_path")
-	if err != nil {
-		http.Error(w, "Error Retrieving the File", http.StatusBadRequest)
-		return
-	}
-	defer file.Close()
-	// Read the file data into a byte slice
-	imageData, err := io.ReadAll(file)
-	if err != nil {
-		http.Error(w, "Error Reading File Data", http.StatusInternalServerError)
-		return
-	}
 
-	imageName := handler.Filename
+	var imageName string
+	var imageData []byte
+
+	// Check if file is provided
+	file, handler, err := r.FormFile("file_path")
+	if err == nil {
+		defer file.Close()
+
+		// Read the file data into a byte slice
+		imageData, err = io.ReadAll(file)
+		if err != nil {
+			http.Error(w, "Error Reading File Data", http.StatusInternalServerError)
+			return
+		}
+
+		imageName = handler.Filename
+	} else {
+		// No image submitted by the user
+		imageName = "No image submitted"
+		imageData = []byte{} // Empty byte slice
+	}
 
 	// check the web form fields for validity
 	errors := make(map[string]string)
@@ -630,8 +656,8 @@ func (app *application) createReport(w http.ResponseWriter, r *http.Request) {
 	}
 	if description = strings.TrimSpace(description); description == "" {
 		errors["description"] = "This field cannot be left blank"
-	} else if len(description) > 255 {
-		errors["description"] = "This field is too long (maximum is 255 characters)"
+	} else if len(description) > 700 {
+		errors["description"] = "This field is too long (maximum is 700 characters)"
 	}
 
 	if deviceLocation != "" && len(deviceLocation) > 255 {
@@ -682,22 +708,27 @@ func (app *application) guardcreateReport(w http.ResponseWriter, r *http.Request
 		personName = app.PersonName
 	}
 
-	// Get the file from the form
+	var imageName string
+	var imageData []byte
+
+	// Check if file is provided
 	file, handler, err := r.FormFile("file_path")
-	if err != nil {
-		http.Error(w, "Error Retrieving the File", http.StatusBadRequest)
-		return
-	}
-	defer file.Close()
+	if err == nil {
+		defer file.Close()
 
-	// Read the file data into a byte slice
-	imageData, err := io.ReadAll(file)
-	if err != nil {
-		http.Error(w, "Error Reading File Data", http.StatusInternalServerError)
-		return
-	}
+		// Read the file data into a byte slice
+		imageData, err = io.ReadAll(file)
+		if err != nil {
+			http.Error(w, "Error Reading File Data", http.StatusInternalServerError)
+			return
+		}
 
-	imageName := handler.Filename
+		imageName = handler.Filename
+	} else {
+		// No image submitted by the user
+		imageName = "No image submitted"
+		imageData = []byte{} // Empty byte slice
+	}
 
 	// check the web form fields for validity
 	errors := make(map[string]string)
@@ -714,8 +745,8 @@ func (app *application) guardcreateReport(w http.ResponseWriter, r *http.Request
 	}
 	if description = strings.TrimSpace(description); description == "" {
 		errors["description"] = "This field cannot be left blank"
-	} else if len(description) > 255 {
-		errors["description"] = "This field is too long (maximum is 255 characters)"
+	} else if len(description) > 700 {
+		errors["description"] = "This field is too long (maximum is 700 characters)"
 	}
 
 	if deviceLocation != "" && len(deviceLocation) > 255 {
@@ -738,4 +769,57 @@ func (app *application) guardcreateReport(w http.ResponseWriter, r *http.Request
 		return
 	}
 	http.Redirect(w, r, "/guard-reports", http.StatusSeeOther)
+}
+
+func (app *application) createLog(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Redirect(w, r, "/check-in-out", http.StatusSeeOther)
+		return
+	}
+
+	logDate := r.FormValue("date")
+	logTime := r.FormValue("time")
+	checkType := r.FormValue("checkType")
+
+	// Assign personName directly without checking for anonymous
+	personName := app.PersonName
+
+	// check the web form fields for validity
+	errors := make(map[string]string)
+	// check each field
+	if logDate = strings.TrimSpace(logDate); logDate == "" {
+		errors["date"] = "This field cannot be left blank"
+	} else if len(logDate) > 50 {
+		errors["date"] = "This field is too long (maximum is 50 characters)"
+	}
+	if logTime = strings.TrimSpace(logTime); logTime == "" {
+		errors["time"] = "This field cannot be left blank"
+	} else if len(logTime) > 100 {
+		errors["time"] = "This field is too long (maximum is 100 characters)"
+	}
+	if checkType = strings.TrimSpace(checkType); checkType == "" {
+		errors["checkType"] = "This field cannot be left blank"
+	} else if len(checkType) > 100 {
+		errors["checkType"] = "This field is too long (maximum is 100 characters)"
+	}
+	// check if there are any errors in the map
+	if len(errors) > 0 {
+		fmt.Fprintln(w, "Validation errors:")
+		for field, errorMsg := range errors {
+			fmt.Fprintf(w, "- %s: %s\n", field, errorMsg)
+		}
+		return
+	}
+
+	// Declare err variable
+	var err error
+
+	// Insert the report
+	_, err = app.ubcs.Insertlog(personName, logDate, logTime, checkType)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, "/check-in-out", http.StatusSeeOther)
 }

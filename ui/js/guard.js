@@ -29,3 +29,19 @@ document.addEventListener('DOMContentLoaded', function() {
       wrapper.classList.toggle('click_collapse');
     });
   });
+
+  // Autofill date and time fields with current date and time
+	window.onload = function() {
+		var dateInput = document.getElementById('date');
+		var timeInput = document.getElementById('time');
+		var currentDate = new Date();
+		var year = currentDate.getFullYear();
+		var month = ('0' + (currentDate.getMonth() + 1)).slice(-2);
+		var day = ('0' + currentDate.getDate()).slice(-2);
+		var hours = ('0' + currentDate.getHours()).slice(-2);
+		var minutes = ('0' + currentDate.getMinutes()).slice(-2);
+		var formattedDate = year + '-' + month + '-' + day;
+		var formattedTime = hours + ':' + minutes;
+		dateInput.value = formattedDate;
+		timeInput.value = formattedTime;
+	};
