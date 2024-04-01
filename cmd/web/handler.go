@@ -79,7 +79,7 @@ func (app *application) verification(w http.ResponseWriter, r *http.Request) {
 	// Render specific template based on role
 	switch role {
 	case 1: // Assuming role 1 is for normal users
-		http.Redirect(w, r, "/admin", http.StatusSeeOther)
+		http.Redirect(w, r, "/add-notice", http.StatusSeeOther)
 	case 2: // Assuming role 2 is for admin users
 		http.Redirect(w, r, "/student", http.StatusSeeOther)
 	case 3: // Assuming role 3 is for guard users
@@ -107,8 +107,8 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 	}
 }
 
-func (app *application) admin(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("./ui/admin/dashboard.tmpl")
+func (app *application) addNotices(w http.ResponseWriter, r *http.Request) {
+	ts, err := template.ParseFiles("./ui/admin/addNotice.tmpl")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -824,4 +824,50 @@ func (app *application) createLog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/check-in-out", http.StatusSeeOther)
+}
+
+func (app *application) createnotice(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Redirect(w, r, "/add-notice", http.StatusSeeOther)
+		return
+	}
+
+	title := r.FormValue("title")
+	message := r.FormValue("message")
+
+	userid := app.MemberID
+
+	// check the web form fields for validity
+	errors := make(map[string]string)
+	// check each field
+	if title = strings.TrimSpace(title); title == "" {
+		errors["title"] = "This field cannot be left blank"
+	} else if len(title) > 50 {
+		errors["title"] = "This field is too long (maximum is 50 characters)"
+	}
+	if message = strings.TrimSpace(message); message == "" {
+		errors["message"] = "This field cannot be left blank"
+	} else if len(message) > 1500 {
+		errors["message"] = "This field is too long (maximum is 1500 characters)"
+	}
+	// check if there are any errors in the map
+	if len(errors) > 0 {
+		fmt.Fprintln(w, "Validation errors:")
+		for field, errorMsg := range errors {
+			fmt.Fprintf(w, "- %s: %s\n", field, errorMsg)
+		}
+		return
+	}
+
+	// Declare err variable
+	var err error
+
+	// Insert the report
+	_, err = app.ubcs.InsertNotice(userid, title, message)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, "/add-notice", http.StatusSeeOther)
 }

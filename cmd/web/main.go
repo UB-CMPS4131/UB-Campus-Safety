@@ -13,14 +13,14 @@ import (
 func setUpDB() (*sql.DB, error) {
 	// Provide the credentials for our database
 	const (
-		host     = "localhost"
+		host     = "bubble.db.elephantsql.com"
 		port     = 5432
-		user     = "ub"
-		password = "iamme"
-		dbname   = "ubcampussafty"
+		user     = "xqymnerr"
+		password = "Xgtj9QRe3ouBnLW1WN-9C_g4_DDWefMr"
+		dbname   = "xqymnerr"
 	)
 
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=require",
 		host, port, user, password, dbname)
 	// Establish a connection to the database
 	db, err := sql.Open("postgres", dsn)
@@ -77,7 +77,6 @@ func main() {
 
 	mux.HandleFunc("/", app.login)
 	mux.HandleFunc("/login", app.verification)
-	mux.HandleFunc("/admin", app.admin)
 	mux.HandleFunc("/student", app.student)
 	mux.HandleFunc("/guard", app.guard)
 	mux.HandleFunc("/reports", app.reports)
@@ -96,6 +95,8 @@ func main() {
 	mux.HandleFunc("/guard-profile", app.guard_profile)
 	mux.HandleFunc("/admin-profile", app.admin_profile)
 	mux.HandleFunc("/create-log", app.createLog)
+	mux.HandleFunc("/create-notice", app.createnotice)
+	mux.HandleFunc("/add-notice", app.addNotices)
 
 	log.Println("Starting server on port :8080")
 	err = http.ListenAndServe(":8080", mux)

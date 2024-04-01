@@ -154,7 +154,6 @@ color: #fff;
     font-weight: 100;
 }
 
-
 /* Updated CSS for the form section */
 
 .container {
@@ -309,5 +308,8 @@ color: #fff;
     .profile {
         margin-left: 0; /* Remove margin from the left for smaller screens */
     }
+    .container {
+        margin-top: 30px;
+    } 
 }
 

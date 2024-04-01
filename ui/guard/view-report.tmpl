@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="icon" type="image/x-icon" href="https://od.lk/s/OTBfNDE0NjQxODBf/app_logo-playstore-removebg-preview.png">
   <title>View Report</title>
   <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
   <link rel="stylesheet" href="../css/guard.css">
@@ -58,23 +59,69 @@
 <section>
     <h3>Reports</h3>
     <ul>
+        <div id="notification_window">
         {{ range . }}
+        <div class="notification-item">
         <li>
             <strong>Person Name:</strong> {{ .PersonName }}<br>
             <strong>Type of Incident:</strong> {{ .TypeOfIncident }}<br>
-            <strong>Location:</strong> <a href="https://www.google.com/maps/search/?api=1&query={{ .Location }}">{{ .Location }}</a><br>
+            <strong>Location:</strong> <a href="https://www.google.com/maps/search/?api=1&query={{ .Location }}" target="_blank">{{ .Location }}</a><br>
             <strong>Description:</strong> {{ .Description }}<br>
             {{ if .EncodedImageData }}
-            <strong>Image:</strong> <img src="data:image/jpeg;base64,{{ .EncodedImageData }}" alt="Report Image"><br>
+                <!-- Dynamically determine the MIME type -->
+                {{ $mimeType := .MimeType }}
+                <!-- Make sure the src attribute of the img tag includes the base64-encoded image data with the correct MIME type -->
+                <strong>Image:</strong> <img class="report-image" src="data:{{ $mimeType }};base64,{{ .EncodedImageData }}" alt="Report Image"><br>
             {{ else }}
-            <strong>Image:</strong> No image available<br>
+                <strong>Image:</strong> No image available<br>
             {{ end }}
         </li>
+        </div>
         {{ else }}
         <p>No reports were submitted</p>
         {{ end }}
+    </div>
     </ul>
 </section>
+
+<!-- The modal -->
+<div id="imageModal" class="modal">
+  <span class="close">&times;</span>
+  <img class="modal-content" id="modalImage">
+</div>
 <script src="../js/guard.js"></script>
+<script>
+    // Get the modal
+    var modal = document.getElementById("imageModal");
+  
+    // Get the image and insert it inside the modal
+    var images = document.querySelectorAll('.report-image');
+    var modalImg = document.getElementById("modalImage");
+    images.forEach(function(image) {
+      image.addEventListener('click', function(){
+        modal.style.display = "block";
+        modalImg.src = this.src;
+      });
+    });
+  
+    // Close the modal when the user clicks on the close button
+    var span = document.getElementsByClassName("close")[0];
+    span.onclick = function() {
+      modal.style.display = "none";
+    };
+  
+    // Close the modal when the user clicks anywhere outside the modal
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    };
+
+    var reports = document.querySelectorAll('.notification-item');
+    var notificationContainer = document.getElementById('notification_window');
+    for (var i = reports.length - 1; i >= 0; i--) {
+      notificationContainer.appendChild(reports[i]);
+    }
+  </script>
 </body>
 </html>

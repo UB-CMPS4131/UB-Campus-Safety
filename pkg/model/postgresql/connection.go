@@ -180,6 +180,18 @@ func (m *ConnectModel) Insertlog(personName, logDate, logTime, checkType string)
 	return id, nil
 }
 
+func (m *ConnectModel) InsertNotice(UserID int, Title, Message string) (int, error) {
+	var id int
+	s := `INSERT INTO notification(user_id, title, message)
+	VALUES ($1, $2, $3) RETURNING notification_id;`
+
+	err := m.DB.QueryRow(s, UserID, Title, Message).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
 func (m *ConnectModel) ReadLog() ([]*models.Log, error) {
 	// SQL statement to fetch profile for the logged-in user based on their member ID
 	s := `
@@ -217,11 +229,11 @@ func (m *ConnectModel) Notification(username string) ([]*models.Notification, er
 		return nil, err
 	}
 
-	s := `SELECT n.notification_id, n.user_id, n.message, n.created_at
+	s := `SELECT n.notification_id, n.title, n.user_id, n.message, n.created_at
 	FROM notification n
 	LEFT JOIN notification_seen ns ON n.notification_id = ns.notification_id AND ns.user_id = $1
-	WHERE ns.notification_id IS NULL;
-	 `
+	WHERE ns.notification_id IS NULL
+	ORDER BY n.notification_id DESC;`
 
 	rows, err := m.DB.Query(s, memberID)
 	if err != nil {
@@ -229,16 +241,16 @@ func (m *ConnectModel) Notification(username string) ([]*models.Notification, er
 	}
 	defer rows.Close()
 
-	notification := []*models.Notification{}
+	notifications := []*models.Notification{}
 
 	for rows.Next() {
 		q := &models.Notification{}
-		err = rows.Scan(&q.Notificationid, &q.UserID, &q.Message, &q.Created_at)
+		err = rows.Scan(&q.Notificationid, &q.Title, &q.UserID, &q.Message, &q.Created_at)
 		if err != nil {
-			return nil, errors.Wrap(err, "error Scanning row")
+			return nil, errors.Wrap(err, "error scanning row")
 		}
-		notification = append(notification, q)
+		notifications = append(notifications, q)
 	}
 
-	return notification, nil
+	return notifications, nil
 }

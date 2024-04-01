@@ -46,6 +46,7 @@ type Log struct {
 type Notification struct {
 	Notificationid int
 	UserID         int
+	Title          string
 	Message        string
 	Created_at     time.Time
 }

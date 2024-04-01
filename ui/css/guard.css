@@ -12,6 +12,33 @@ text-decoration: none;
 body{
 background: #f5f5f5;
 }
+.loader {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #333;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  #loading-overlay {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.5);
+    z-index: 9999;
+  }
+  
 
 .top_navbar{
 position: fixed;
@@ -23,6 +50,7 @@ background: #323233;
 box-shadow: 1px 0 2px rgba(0,0,0,0.125);
 display: flex;
 align-items: center;
+z-index: 100;
 }
 
 .top_navbar .logo{
@@ -97,46 +125,21 @@ font-family: sans-serif;
 font-size: 18px;
 letter-spacing: 2px;
 }
-
-/* Updated CSS */
-
 @media only screen and (max-width: 768px) {
-  .sidebar {
-    display: none;
+    .sidebar {
+      display: none;
+    }
+  
+    .hover_collapse .sidebar {
+      width: auto; /* Adjust width as needed */
+    }
+  
+    .click_collapse .sidebar {
+      display: block;
+      width: 220px; /* Width of the sidebar */
+    }
   }
-
-  .hover_collapse .sidebar {
-    width: auto; /* Adjust width as needed */
-  }
-
-  .click_collapse .sidebar {
-    display: block;
-    width: 220px; /* Width of the sidebar */
-  }
-
-  section {
-    margin-left: 10px; /* Adjust margin-left to provide space for the sidebar */
-    margin-top: 80px; /* Adjust as needed based on the height of your navbar */
-    padding: 20px;
-  }
-}
-
-/* For smaller screens like phones */
-@media only screen and (max-width: 480px) {
-  .top_navbar .logo {
-    width: 250px; /* Adjust logo width for smaller screens */
-  }
-
-  .top_navbar .menu {
-    width: 70%; /* Adjust menu width for smaller screens */
-  }
-
-  section {
-    margin-top: 140px; /* Adjust margin-top for smaller screens */
-    padding: 10px; /* Adjust padding for smaller screens */
-  }
-}
-
+  
 
 .sidebar ul li a:hover{
 background: #0e94d4;
@@ -148,16 +151,15 @@ color: #fff;
 }
 
 section {
-  margin-left: 80px;
-  margin-top: 80px; /* Adjust as needed based on the height of your navbar */
+  margin-top: 80px; /* Adjust spacing from the top navbar */
+  margin-left: 80px; /* Adjust spacing from the sidebar */
   padding: 20px;
 }
 
-section h2 {
+section h3 {
   font-size: 24px;
   color: #333;
   margin-bottom: 20px;
-  text-align: center;
 }
 
 section ul {
@@ -177,12 +179,53 @@ section ul li strong {
 }
 
 section ul li img {
-  max-width: 100%;
+  max-width: 120px; /* Set the maximum width of the image */
+  max-height: 120px; /* Set the maximum height of the image */
   height: auto;
   margin-top: 10px;
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+   /* Style for the modal */
+   .modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.9);
+  }
+  .modal-content {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px;
+  }
+  .modal-content img {
+    width: 100%;
+  }
+  /* Close button */
+  .close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+  }
+  .close:hover,
+  .close:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+  }
 
 /* Profile Section Styling */
 
@@ -209,66 +252,72 @@ section ul li img {
 }
 
 /* Adjustments for smaller screens */
+/* Centering the section for report on smartphones */
 @media only screen and (max-width: 768px) {
-  .profile {
-      margin-left: 0; /* Remove margin from the left for smaller screens */
+  section {
+    margin-top: 80px; /* Adjust spacing from the top navbar */
+    margin-left: auto; /* Center the section horizontally */
+    margin-right: auto; /* Center the section horizontally */
+    padding: 20px;
+    max-width: 600px; /* Set maximum width for better readability */
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for depth */
   }
 }
 
-    /* Updated CSS */
-    section {
-      margin-top: 80px; /* Adjust spacing from the top navbar */
-      margin-left: 80px; /* Adjust spacing from the sidebar */
-      padding: 20px;
-    }
 
-    section h2 {
-      font-size: 24px;
-      color: #333;
-      margin-bottom: 20px;
-    }
+/* Updated CSS for the form section */
 
-    section form {
-      max-width: 400px; /* Adjust the maximum width of the form */
-      margin: 0 auto; /* Center the form horizontally */
-    }
+.container {
+  margin: 20px auto 80px; /* Adjust spacing from the top navbar and the bottom */
+  max-width: 600px; /* Set maximum width for better readability */
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for depth */
+}
 
-    section form label {
-      display: block;
-      margin-bottom: 10px;
-      font-weight: bold;
-    }
+.container form {
+  display: flex;
+  flex-direction: column;
+}
 
-    section form input[type="date"],
-    section form input[type="time"],
-    section form select,
-    section form input[type="submit"] {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 20px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
+.container form label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
 
-    section form input[type="submit"] {
-      background-color: #007dc3;
-      color: #fff;
-      cursor: pointer;
-    }
+.container form input[type="text"],
+.container form input[type="file"],
+.container form textarea {
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
 
-    /* Adjustments for smaller screens */
-    @media only screen and (max-width: 768px) {
-      section {
-        margin-left: 10px; /* Adjust margin-left to provide space for the sidebar */
-        margin-top: 80px; /* Adjust as needed based on the height of your navbar */
-        padding: 20px;
-      }
-    }
+.container form input[type="checkbox"] {
+  margin-left: 10px;
+  vertical-align: middle; /* Align checkboxes vertically with the text */
+}
 
-    @media only screen and (max-width: 480px) {
-      section {
-        margin-top: 140px; /* Adjust margin-top for smaller screens */
-        padding: 10px; /* Adjust padding for smaller screens */
-      }
-    }
+.container form label[for="is-anonymous"], /* Target specific labels */
+.container form label[for="useLocation"] {
+  display: inline-block; /* Make labels inline-block */
+  vertical-align: middle; /* Align labels vertically with the checkboxes */
+  margin-bottom: 0; /* Remove bottom margin */
+}
+
+
+.container form input[type="submit"] {
+  padding: 10px 20px;
+  background-color: #007dc3;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}

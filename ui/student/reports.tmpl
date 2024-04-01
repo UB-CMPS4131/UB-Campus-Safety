@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="icon" type="image/x-icon" href="https://od.lk/s/OTBfNDE0NjQxODBf/app_logo-playstore-removebg-preview.png">
   <title>Add Report</title>
 
   <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
@@ -35,6 +36,16 @@
     color: white;
     font-weight: 100;
 }
+
+.notification-item {
+    cursor: pointer;
+    overflow: hidden;
+    max-height: 3.6em; /* Approximately two lines of text */
+    transition: max-height 0.5s ease;
+}
+.notification-item.expanded {
+    max-height: none;
+}
   </style>
 </head>
 <body>
@@ -55,8 +66,9 @@
         <div class="notification" id="notification_window" style="display: none;">
             {{range .}} <!-- Updated field name here -->
                 <div class="notification-item">
-                    <p>{{.Message}}</p>
-                    <p>{{.Created_at.Format "2006-01-02 15:04:05"}}</p>
+                  <p><strong>{{.Title}}</strong></p>
+                  <p><strong>Posted:</strong> {{.Created_at.Format "2006-01-02"}}</p>
+                  <p>{{.Message}}</p>
                 </div>
             {{end}}
         </div>
@@ -146,24 +158,39 @@
   };
 
   var notificationIcon = document.getElementById('notification_icon');
-  var notificationWindow = document.getElementById('notification_window');
+        var notificationWindow = document.getElementById('notification_window');
 
-  notificationIcon.addEventListener('click', function(event) {
-      event.stopPropagation(); // Prevents the click event from reaching the document
-      if (notificationWindow.style.display === 'none') {
-          notificationWindow.style.display = 'block';
-      } else {
-          notificationWindow.style.display = 'none';
-      }
-  });
+        notificationIcon.addEventListener('click', function(event) {
+            event.stopPropagation(); // Prevents the click event from reaching the document
+            if (notificationWindow.style.display === 'none') {
+                notificationWindow.style.display = 'block';
+            } else {
+                notificationWindow.style.display = 'none';
+            }
+        });
 
-  // Add click event listener to the document to hide the window when clicked outside
-  document.addEventListener('click', function(event) {
-      if (!notificationWindow.contains(event.target) && event.target !== notificationIcon) {
-          // Clicked outside the notification window
-          notificationWindow.style.display = 'none';
-      }
-  });
+        // Add click event listener to the document to hide the window when clicked outside
+        document.addEventListener('click', function(event) {
+            if (!notificationWindow.contains(event.target) && event.target !== notificationIcon) {
+                // Clicked outside the notification window
+                notificationWindow.style.display = 'none';
+            }
+        });
+
+        // Toggle expand/collapse of notification items
+        var notificationItems = document.querySelectorAll('.notification-item');
+        notificationItems.forEach(function(item) {
+            item.addEventListener('click', function() {
+                item.classList.toggle('expanded');
+            });
+        });
+
+          // Reorder notifications in descending order
+  var notifications = document.querySelectorAll('.notification-item');
+  var notificationContainer = document.getElementById('notification_window');
+  for (var i = notifications.length - 1; i >= 0; i--) {
+      notificationContainer.appendChild(notifications[i]);
+  }
 </script>
 
 </body>
