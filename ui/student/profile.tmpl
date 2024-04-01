@@ -6,8 +6,17 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>View Profile</title>
     <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+    <script src="../js/student.js" defer></script>
+
     <link rel="stylesheet" href="../css/student.css">
 </head>
+<style>
+#notification_icon{
+    color: white;
+    font-weight: 100;
+}
+
+</style>
 <body>
     <div class="wrapper hover_collapse">
         <div class="top_navbar">
@@ -17,7 +26,21 @@
                 </div>
             </div>
             <div class="logo">UB CAMPUS SAFETY</div>
+            <div class="notification_icon">
+                <i class="fas fa-bell" id="notification_icon"></i>
+            </div>
         </div>
+            
+        <!-- Notification window -->
+        <div class="notification" id="notification_window" style="display: none;">
+            {{range .Notification}}
+                <div class="notification-item">
+                    <p>{{.Message}}</p>
+                    <p>{{.Created_at.Format "2006-01-02 15:04:05"}}</p>
+                </div>
+            {{end}}
+        </div>
+
         <div class="sidebar">
             <div class="sidebar_inner">
                 <ul>
@@ -43,20 +66,44 @@
             </div>
         </div>
     </div>
+
     <!-- Profile Display -->
     <div class="profile">
-        <div class="profile-info">
-            <!-- Display the profile image -->
-            <img src="data:{{.MimeType}};base64,{{.EncodedImage}}" alt="Profile Picture">
-          
-            <!-- Display profile information -->
-            <p><strong>First Name:</strong> {{.Fname}}</p>
-            <p><strong>Middle Name:</strong> {{.Mname}}</p>
-            <p><strong>Last Name:</strong> {{.LName}}</p>
-            <p><strong>Date of Birth:</strong> {{.DOB.Format "2006-01-02"}}</p>
-            <p><strong>Gender:</strong> {{.Gender}}</p>
-        </div>
+        {{range .DATA}}
+            <div class="profile-info">
+                <!-- Display the profile image -->
+                <img src="data:{{.MimeType}};base64,{{.EncodedImage}}" alt="Profile Picture">
+              
+                <!-- Display profile information -->
+                <p><strong>First Name:</strong> {{.Fname}}</p>
+                <p><strong>Middle Name:</strong> {{.Mname}}</p>
+                <p><strong>Last Name:</strong> {{.LName}}</p>
+                <p><strong>Date of Birth:</strong> {{.DOB.Format "2006-01-02"}}</p>
+                <p><strong>Gender:</strong> {{.Gender}}</p>
+            </div>
+        {{end}}
     </div>
-    <script src="../js/student.js"></script>
+<script>
+        var notificationIcon = document.getElementById('notification_icon');
+        var notificationWindow = document.getElementById('notification_window');
+
+        notificationIcon.addEventListener('click', function(event) {
+            event.stopPropagation(); // Prevents the click event from reaching the document
+            if (notificationWindow.style.display === 'none') {
+                notificationWindow.style.display = 'block';
+            } else {
+                notificationWindow.style.display = 'none';
+            }
+        });
+
+        // Add click event listener to the document to hide the window when clicked outside
+        document.addEventListener('click', function(event) {
+            if (!notificationWindow.contains(event.target) && event.target !== notificationIcon) {
+                // Clicked outside the notification window
+                notificationWindow.style.display = 'none';
+            }
+        });
+
+</script>
 </body>
 </html>

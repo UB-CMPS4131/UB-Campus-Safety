@@ -55,6 +55,19 @@ CREATE TABLE log (
     check_type VARCHAR(8) NOT NULL
 );
 
+CREATE TABLE notification_seen (
+    notification_id INTEGER REFERENCES notification(notification_id),
+    user_id INTEGER REFERENCES personnelinfotable(id),
+    seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (notification_id, user_id)
+);
+
+CREATE TABLE notification (
+    notification_id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES personnelinfotable(id),
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 INSERT INTO ROLES (role_name) VALUES ('admin'), ('student'), ('guard');
 

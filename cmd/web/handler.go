@@ -134,7 +134,12 @@ func (app *application) student(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	err = ts.Execute(w, nil)
+	not, err := app.ubcs.Notification(app.Username)
+	if err != nil {
+		println("ERROR:" + err.Error())
+	}
+
+	err = ts.Execute(w, not)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -170,7 +175,12 @@ func (app *application) reports(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	err = ts.Execute(w, nil)
+	not, err := app.ubcs.Notification(app.Username)
+	if err != nil {
+		println("ERROR:" + err.Error())
+	}
+
+	err = ts.Execute(w, not)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -184,7 +194,7 @@ func (app *application) guard_profile(w http.ResponseWriter, r *http.Request) {
 	username := app.Username
 
 	// Pass the username to the ReadProfile method to fetch the profile
-	profiles, err := app.ubcs.ReadProfile(username)
+	profiles, err := app.ubcs.ReadProfile(username, false)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -193,13 +203,10 @@ func (app *application) guard_profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(profiles) == 0 {
+	if len(profiles.DATA) == 0 {
 		http.Error(w, "Profile not found", http.StatusNotFound)
 		return
 	}
-
-	// Assuming there's only one profile per username
-	profile := profiles[0]
 
 	// Display the profile using a template
 	ts, err := template.ParseFiles("./ui/guard/guard-profile.tmpl")
@@ -211,7 +218,7 @@ func (app *application) guard_profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = ts.Execute(w, profile)
+	err = ts.Execute(w, profiles.DATA)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -225,7 +232,7 @@ func (app *application) admin_profile(w http.ResponseWriter, r *http.Request) {
 	username := app.Username
 
 	// Pass the username to the ReadProfile method to fetch the profile
-	profiles, err := app.ubcs.ReadProfile(username)
+	profiles, err := app.ubcs.ReadProfile(username, false)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -234,13 +241,10 @@ func (app *application) admin_profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(profiles) == 0 {
+	if len(profiles.DATA) == 0 {
 		http.Error(w, "Profile not found", http.StatusNotFound)
 		return
 	}
-
-	// Assuming there's only one profile per username
-	profile := profiles[0]
 
 	// Display the profile using a template
 	ts, err := template.ParseFiles("./ui/admin/admin-profile.tmpl")
@@ -252,7 +256,7 @@ func (app *application) admin_profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = ts.Execute(w, profile)
+	err = ts.Execute(w, profiles.DATA)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -261,6 +265,7 @@ func (app *application) admin_profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
 func (app *application) guardreports(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles("./ui/guard/guard-reports.tmpl")
 	if err != nil {
@@ -302,7 +307,7 @@ func (app *application) profile(w http.ResponseWriter, r *http.Request) {
 	username := app.Username
 
 	// Pass the username to the ReadProfile method to fetch the profile
-	profiles, err := app.ubcs.ReadProfile(username)
+	profiles, err := app.ubcs.ReadProfile(username, true)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -311,13 +316,10 @@ func (app *application) profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(profiles) == 0 {
+	if len(profiles.DATA) == 0 {
 		http.Error(w, "Profile not found", http.StatusNotFound)
 		return
 	}
-
-	// Assuming there's only one profile per username
-	profile := profiles[0]
 
 	// Display the profile using a template
 	ts, err := template.ParseFiles("./ui/student/profile.tmpl")
@@ -329,7 +331,7 @@ func (app *application) profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = ts.Execute(w, profile)
+	err = ts.Execute(w, profiles)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,

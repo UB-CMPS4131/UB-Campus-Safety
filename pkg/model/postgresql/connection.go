@@ -7,6 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	common "amencia.net/ubb-campus-safety-main/pkg/mixModel"
 	models "amencia.net/ubb-campus-safety-main/pkg/model"
 )
 
@@ -108,19 +109,7 @@ func (m *ConnectModel) ReadReport() ([]*models.Report, error) {
 	return reports, nil
 }
 
-// ConvertToBase64 converts a byte slice to a base64 encoded string
-func ConvertToBase64(data []byte) (string, error) {
-	if len(data) == 0 {
-		return "", nil // Return empty string if data is empty
-	}
-
-	// Encode data to base64
-	encodedString := base64.StdEncoding.EncodeToString(data)
-
-	return encodedString, nil
-}
-
-func (m *ConnectModel) ReadProfile(username string) ([]*models.Profile, error) {
+func (m *ConnectModel) ReadProfile(username string, extra bool) (*common.ProfileDATA, error) {
 	// Query to fetch the member ID associated with the logged-in user
 	var memberID int
 	err := m.DB.QueryRow("SELECT memberID FROM LOGIN WHERE username = $1", username).Scan(&memberID)
@@ -133,6 +122,7 @@ func (m *ConnectModel) ReadProfile(username string) ([]*models.Profile, error) {
     SELECT id, image, fname, mname, lname, dob, gender, imagedata
     FROM personnelinfotable
     WHERE id = $1
+	LIMIT 1
     `
 	rows, err := m.DB.Query(s, memberID)
 	if err != nil {
@@ -161,7 +151,21 @@ func (m *ConnectModel) ReadProfile(username string) ([]*models.Profile, error) {
 	if err := rows.Err(); err != nil {
 		return nil, errors.Wrap(err, "error iterating over rows")
 	}
-	return profile, nil
+
+	var not []*models.Notification
+	if extra {
+		not, err = m.Notification(username)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	DATA := &common.ProfileDATA{
+		DATA:         profile,
+		Notification: not,
+	}
+
+	return DATA, nil
 }
 
 func (m *ConnectModel) Insertlog(personName, logDate, logTime, checkType string) (int, error) {
@@ -177,8 +181,6 @@ func (m *ConnectModel) Insertlog(personName, logDate, logTime, checkType string)
 }
 
 func (m *ConnectModel) ReadLog() ([]*models.Log, error) {
-	// Query to fetch the member ID associated with the logged-in user
-
 	// SQL statement to fetch profile for the logged-in user based on their member ID
 	s := `
     SELECT person_name, log_date, log_time, check_type
@@ -206,4 +208,37 @@ func (m *ConnectModel) ReadLog() ([]*models.Log, error) {
 		return nil, errors.Wrap(err, "error iterating over rows")
 	}
 	return log, nil
+}
+
+func (m *ConnectModel) Notification(username string) ([]*models.Notification, error) {
+	var memberID int
+	err := m.DB.QueryRow("SELECT memberID FROM LOGIN WHERE username = $1", username).Scan(&memberID)
+	if err != nil {
+		return nil, err
+	}
+
+	s := `SELECT n.notification_id, n.user_id, n.message, n.created_at
+	FROM notification n
+	LEFT JOIN notification_seen ns ON n.notification_id = ns.notification_id AND ns.user_id = $1
+	WHERE ns.notification_id IS NULL;
+	 `
+
+	rows, err := m.DB.Query(s, memberID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	notification := []*models.Notification{}
+
+	for rows.Next() {
+		q := &models.Notification{}
+		err = rows.Scan(&q.Notificationid, &q.UserID, &q.Message, &q.Created_at)
+		if err != nil {
+			return nil, errors.Wrap(err, "error Scanning row")
+		}
+		notification = append(notification, q)
+	}
+
+	return notification, nil
 }

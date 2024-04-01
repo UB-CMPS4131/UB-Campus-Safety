@@ -31,21 +31,35 @@
       color: white;
       font-size: 24px;
     }
+    #notification_icon{
+    color: white;
+    font-weight: 100;
+}
   </style>
 </head>
 <body>
-
-<div class="wrapper hover_collapse">
-	<div class="top_navbar">
-		<div class="menu">
-			<div class="hamburger">
-				<i class="fas fa-bars"></i>
-			</div>
-
-		</div>
-		<div class="logo">UB CAMPUS SAFETY</div>
-	</div>
-
+    <div class="wrapper hover_collapse">
+        <div class="top_navbar">
+            <div class="menu">
+                <div class="hamburger">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+            <div class="logo">UB CAMPUS SAFETY</div>
+            <div class="notification_icon">
+                <i class="fas fa-bell" id="notification_icon"></i>
+            </div>
+        </div>
+            
+        <!-- Notification window -->
+        <div class="notification" id="notification_window" style="display: none;">
+            {{range .}} <!-- Updated field name here -->
+                <div class="notification-item">
+                    <p>{{.Message}}</p>
+                    <p>{{.Created_at.Format "2006-01-02 15:04:05"}}</p>
+                </div>
+            {{end}}
+        </div>
 	<div class="sidebar">
 		<div class="sidebar_inner">
 		<ul>
@@ -130,6 +144,26 @@
       document.querySelector('.loading').innerText = 'Successful';
     }
   };
+
+  var notificationIcon = document.getElementById('notification_icon');
+  var notificationWindow = document.getElementById('notification_window');
+
+  notificationIcon.addEventListener('click', function(event) {
+      event.stopPropagation(); // Prevents the click event from reaching the document
+      if (notificationWindow.style.display === 'none') {
+          notificationWindow.style.display = 'block';
+      } else {
+          notificationWindow.style.display = 'none';
+      }
+  });
+
+  // Add click event listener to the document to hide the window when clicked outside
+  document.addEventListener('click', function(event) {
+      if (!notificationWindow.contains(event.target) && event.target !== notificationIcon) {
+          // Clicked outside the notification window
+          notificationWindow.style.display = 'none';
+      }
+  });
 </script>
 
 </body>

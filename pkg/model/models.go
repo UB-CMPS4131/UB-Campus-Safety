@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type LoginCredentials struct {
 	MemberID      int
@@ -39,4 +41,17 @@ type Log struct {
 	LogDate    time.Time
 	LogTime    time.Time
 	CheckType  string
+}
+
+type Notification struct {
+	Notificationid int
+	UserID         int
+	Message        string
+	Created_at     time.Time
+}
+
+type Notification_Seen struct {
+	notification_id int
+	user_id         int
+	seen_at         time.Time
 }
