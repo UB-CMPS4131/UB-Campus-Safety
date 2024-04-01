@@ -1,8 +1,11 @@
-DROP TABLE IF EXISTS ROLES CASCADE;
-DROP TABLE IF EXISTS PersonnelInfoTable CASCADE;
+DROP TABLE IF EXISTS notification_seen CASCADE;
+DROP TABLE IF EXISTS notice CASCADE;
+DROP TABLE IF EXISTS notification CASCADE;
+DROP TABLE IF EXISTS log CASCADE;
+DROP TABLE IF EXISTS Report CASCADE;
 DROP TABLE IF EXISTS LOGIN CASCADE;
-DROP TABLE IF EXISTS Report;
-DROP TABLE IF EXISTS log;
+DROP TABLE IF EXISTS PersonnelInfoTable CASCADE;
+DROP TABLE IF EXISTS ROLES CASCADE;
 
 -- Create ROLES table
 CREATE TABLE ROLES (
@@ -54,19 +57,18 @@ CREATE TABLE log (
     log_time TIME NOT NULL,
     check_type VARCHAR(8) NOT NULL
 );
-
-CREATE TABLE notification_seen (
-    notification_id INTEGER REFERENCES notification(notification_id),
-    user_id INTEGER REFERENCES personnelinfotable(id),
-    seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (notification_id, user_id)
-);
-
 CREATE TABLE notification (
     notification_id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES personnelinfotable(id),
-    message TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    user_id integer,
+    title VARCHAR(100) NOT NULL,
+    message text NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE notification_seen (
+    notification_id SERIAL PRIMARY KEY,
+    user_id integer NOT NULL,
+    seen_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
 );
 
 INSERT INTO ROLES (role_name) VALUES ('admin'), ('student'), ('guard');
@@ -79,8 +81,6 @@ VALUES ('https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-compute
         'Doe', 
         '1990-01-01', 
         'Male');
-
-
 
 INSERT INTO LOGIN (memberID, username, password, Role, pastPasswords)
 VALUES 
