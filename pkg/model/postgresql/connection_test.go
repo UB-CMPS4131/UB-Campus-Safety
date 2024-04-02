@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"net/http"
 	"reflect"
-	"regexp"
 	"testing"
 	"time"
 
@@ -361,8 +360,7 @@ func TestConnectModel_Notification(t *testing.T) {
 	}
 
 	// Define the expected query and result
-	queryRegex := regexp.QuoteMeta("SELECT memberID FROM LOGIN WHERE username = ?")
-        mock.ExpectQuery("^" + queryRegex + "$").WithArgs(username).WillReturnRows(sqlmock.NewRows([]string{"memberID"}).AddRow(memberID))
+	mock.ExpectQuery("SELECT memberID FROM LOGIN WHERE username = ?").WithArgs(username).WillReturnRows(sqlmock.NewRows([]string{"memberID"}).AddRow(memberID))
 
 	rows := sqlmock.NewRows([]string{"notification_id", "title", "user_id", "message", "created_at"})
 	for _, n := range expectedNotifications {
