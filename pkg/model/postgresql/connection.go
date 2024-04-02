@@ -29,7 +29,7 @@ func (m *ConnectModel) Insert(incidentType, personName, location, description, i
 
 func (m *ConnectModel) NewUser(username, fname, lastname, middlename, gender, dob string, imagedata []byte, imagename string, usertype int) (int, error) {
 	// Check if username already exists
-	usernameExists, err := m.usernameExists(fname + lastname)
+	usernameExists, err := m.UsernameExists(fname + lastname)
 	if err != nil {
 		return 0, err
 	}
@@ -59,7 +59,7 @@ func (m *ConnectModel) NewUser(username, fname, lastname, middlename, gender, do
 }
 
 // to ensure no duplicate user is being added
-func (m *ConnectModel) usernameExists(username string) (bool, error) {
+func (m *ConnectModel) UsernameExists(username string) (bool, error) {
 	var count int
 	err := m.DB.QueryRow("SELECT COUNT(*) FROM login WHERE username = $1", username).Scan(&count)
 	if err != nil {
