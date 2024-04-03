@@ -403,7 +403,7 @@ func TestConnectModel_ReadProfile(t *testing.T) {
 	memberID := 1
 
 	// Mock database query for SELECT memberID FROM LOGIN WHERE username = $1
-	mock.ExpectQuery("SELECT memberID FROM LOGIN WHERE username = ?").WithArgs(username).WillReturnRows(sqlmock.NewRows([]string{"memberID"}).AddRow(memberID))
+	mock.ExpectQuery("SELECT memberID FROM LOGIN WHERE userna = ?").WithArgs(username).WillReturnRows(sqlmock.NewRows([]string{"memberID"}).AddRow(memberID))
 	currentTime := time.Now().Truncate(time.Second)
 	// Mock database query for SELECT id, image, fname, mname, lname, dob, gender, imagedata FROM personnelinfotable WHERE id = ? LIMIT 1;
 	rows := sqlmock.NewRows([]string{"id", "image", "fname", "mname", "lname", "dob", "gender", "imagedata"}).
