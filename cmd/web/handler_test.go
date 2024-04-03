@@ -14,8 +14,13 @@ type MockDB struct {
 
 // QueryRow mocks the database query operation
 func (m *MockDB) QueryRow(query string, args ...interface{}) mockRow {
-	// Simulating a row with username "testuser" and password "testpassword"
-	return mockRow{"mpit", 1, 1} // Assuming role and memberID values
+	switch query {
+	case "SELECT password, role, memberID FROM LOGIN WHERE username = ?":
+		// Simulating a row with username "testuser" and password "testpassword"
+		return mockRow{"mpit", 1, 1} // Assuming role and memberID values
+	default:
+		return mockRow{} // Return an empty mockRow for unknown queries
+	}
 }
 
 // mockRow is a mock implementation of sql.Row for testing purposes
