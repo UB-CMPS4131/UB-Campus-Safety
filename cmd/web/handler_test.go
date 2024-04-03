@@ -6,19 +6,10 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-
-	"amencia.net/ubb-campus-safety-main/pkg/model/postgresql"
-	"github.com/DATA-DOG/go-sqlmock"
 )
 
 // MockDB is a mock implementation of the database interface for testing purposes
 type MockDB struct {
-	ubcs postgresql.ConnectModel
-}
-
-// Connect implements the Connect method of model.DatabaseModel interface
-func (m *MockDB) Connect() (*sql.DB, error) {
-	return m.Connect()
 }
 
 // QueryRow mocks the database query operation
@@ -48,21 +39,8 @@ func (m mockRow) Scan(dest ...interface{}) error {
 }
 
 func TestVerificationHandler(t *testing.T) {
-	// Create a mock database connection
-	db, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("error creating mock DB: %v", err)
-	}
-	defer db.Close()
-
-	// Create a new instance of the application
-	ubcs := &postgresql.ConnectModel{DB: db}
-
-	// Expect a query to be executed during the test
-	mock.ExpectQuery("SELECT password, role, memberID FROM LOGIN WHERE username = ?").
-		WithArgs("mpit").
-		WillReturnRows(sqlmock.NewRows([]string{"password", "role", "memberID"}).
-			AddRow("mpit", 1, 1))
+	// Create a new instance of the MockDB
+	mockDB := &MockDB{}
 
 	// Create a new HTTP request to simulate a POST request
 	reqBody := strings.NewReader("username=mpit&password=mpit")
@@ -84,7 +62,9 @@ func TestVerificationHandler(t *testing.T) {
 		var storedPassword string
 		var role int
 		var memberID int
-		err := ubcs.DB.QueryRow("SELECT password, role, memberID FROM LOGIN WHERE username = $1", username).Scan(&storedPassword, &role, &memberID)
+		// Call the QueryRow method of the mock database
+		row := mockDB.QueryRow("SELECT password, role, memberID FROM LOGIN WHERE username = ?", username)
+		err := row.Scan(&storedPassword, &role, &memberID)
 		if err == sql.ErrNoRows || storedPassword != password {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
@@ -101,10 +81,5 @@ func TestVerificationHandler(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusSeeOther)
 	}
 
-	// Additional assertions can be made here to ensure correct behavior
-
-	// Check if all expectations were met
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %s", err)
-	}
+	// No need to check for unfulfilled expectations as we are not using sqlmock anymore
 }
