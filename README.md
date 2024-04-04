@@ -9,7 +9,6 @@ The University of Belize grapples with a multifaceted challenge regarding the sa
 ## Introduction
 
 - Everything is well documented, please take a look at [docs](./docs) folder.
-- All the required UML Diagrams are also drawn.
 - Steps to setup the project are mentioned [here](./docs/INSTALLATION.md)
 - Steps to deploy are mentioned [here](./docs/DEPLOY.md)
 
