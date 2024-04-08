@@ -42,5 +42,5 @@ jobs:
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4.0.1
       with:
-        token: 6e622462-019b-4976-b067-f3c207ac9013
+        token: ${{ secrets.CODECOV_TOKEN }}
         slug: UB-CMPS4131/UB-Campus-Safety
