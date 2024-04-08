@@ -1,6 +1,4 @@
-Below is a sample `DEPLOY.md` file that outlines the steps for deploying a Golang application with PostgreSQL as the database on Ubuntu. This assumes that you have already set up your Ubuntu server and have PostgreSQL installed and configured.
 
-```markdown
 # Deployment Guide
 
 This guide will walk you through the deployment process for the UB Campus Safety Golang application with PostgreSQL as the database on an Ubuntu server.
@@ -31,4 +29,4 @@ This guide will walk you through the deployment process for the UB Campus Safety
 ## Additional Notes
 
 - Ensure that your firewall settings allow traffic on port 8080 if you're accessing the application remotely.
-```
+
