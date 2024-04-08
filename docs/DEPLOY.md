@@ -22,6 +22,14 @@ This guide will walk you through the deployment process for the UB Campus Safety
      ```bash
      go run ./cmd/web/
      ```
+    - Run test cases:
+     ```bash
+     go test -v ./...
+     ```
+     - Run test cases with coverage:
+     ```bash
+     go test -v -cover ./...
+     ```
 
 2. **Access the Application:**
    - The application should now be running. Access it using a web browser at `http://localhost:8080`.
