@@ -5,6 +5,10 @@ The University of Belize grapples with a multifaceted challenge regarding the sa
 
 [![Build Status](https://github.com/UB-CMPS4131/UB-Campus-Safety/actions/workflows/CI-Test.yml/badge.svg)](https://github.com/UB-CMPS4131/UB-Campus-Safety/blob/main/.github/workflows/CI-Test.yml)
 
+[![Coverage Status](https://img.shields.io/codecov/c/github/UB-CMPS4131/UB-Campus-Safety.svg)](https://codecov.io/gh/UB-CMPS4131/UB-Campus-Safety)
+
+
+
 
 ## Introduction
 
