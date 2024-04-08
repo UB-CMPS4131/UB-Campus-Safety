@@ -22,11 +22,11 @@ This guide will walk you through the deployment process for the UB Campus Safety
      ```bash
      go run ./cmd/web/
      ```
-    - Run test cases:
+   - Run test cases:
      ```bash
      go test -v ./...
      ```
-     - Run test cases with coverage:
+   - Run test cases with coverage:
      ```bash
      go test -v -cover ./...
      ```
