@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
+	"golang.org/x/crypto/bcrypt"
 
 	common "amencia.net/ubb-campus-safety-main/pkg/mixModel"
 	models "amencia.net/ubb-campus-safety-main/pkg/model"
@@ -47,10 +48,15 @@ func (m *ConnectModel) NewUser(username, fname, lastname, middlename, gender, do
 		return 0, err
 	}
 
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(username), 12)
+	if err != nil {
+		return 0, err
+	}
+
 	s = `INSERT INTO login(memberid, username, password, role)
     VALUES ($1, $2, $3, $4)`
 
-	_, err = m.DB.Exec(s, id, username, username, usertype)
+	_, err = m.DB.Exec(s, id, username, hashedPassword, usertype)
 	if err != nil {
 		return 0, err
 	}

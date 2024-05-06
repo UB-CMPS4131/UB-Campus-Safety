@@ -10,6 +10,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (app *application) login(w http.ResponseWriter, r *http.Request) {
@@ -51,11 +53,18 @@ func (app *application) verification(w http.ResponseWriter, r *http.Request) {
 	password := r.PostForm.Get("password")
 
 	// Fetch user credentials from the database
-	var storedPassword string
+	var storedPassword []byte
 	var role int
 	var memberID int // Added memberID variable
 	err = app.ubcs.DB.QueryRow("SELECT password, role, memberID FROM LOGIN WHERE username = $1", username).Scan(&storedPassword, &role, &memberID)
-	if err == sql.ErrNoRows || storedPassword != password {
+	if err == sql.ErrNoRows {
+		data.ErrorMessage = "Invalid username or password"
+		renderTemplate(w, "./ui/html/login.tmpl", data)
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword(storedPassword, []byte(password))
+	if err != nil {
 		data.ErrorMessage = "Invalid username or password"
 		renderTemplate(w, "./ui/html/login.tmpl", data)
 		return

@@ -13,11 +13,11 @@ import (
 func setUpDB() (*sql.DB, error) {
 	// Provide the credentials for our database
 	const (
-		host     = "bubble.db.elephantsql.com"
+		host     = "localhost"
 		port     = 5432
-		user     = "xqymnerr"
-		password = "Xgtj9QRe3ouBnLW1WN-9C_g4_DDWefMr"
-		dbname   = "xqymnerr"
+		user     = "ub"
+		password = "iamme"
+		dbname   = "ubcampussafty"
 	)
 
 	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=require",
