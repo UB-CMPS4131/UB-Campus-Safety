@@ -37,4 +37,13 @@ jobs:
         PGPASSWORD: Xgtj9QRe3ouBnLW1WN-9C_g4_DDWefMr
         PGDATABASE: xqymnerr
         PGPORT: 5432
-      run: go test -v -cover ./...
+      run: go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4.0.1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        slug: UB-CMPS4131/UB-Campus-Safety
+
+
+        
