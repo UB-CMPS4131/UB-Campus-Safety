@@ -198,6 +198,18 @@ func (m *ConnectModel) InsertNotice(UserID int, Title, Message string) (int, err
 	return id, nil
 }
 
+func (m *ConnectModel) InsertContact(name, number, email string) (int, error) {
+	var id int
+	s := `INSERT INTO contact(name, number, email)
+	VALUES ($1, $2, $3) RETURNING contact_id;`
+
+	err := m.DB.QueryRow(s, name, number, email).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
 func (m *ConnectModel) ReadLog() ([]*models.Log, error) {
 	// SQL statement to fetch profile for the logged-in user based on their member ID
 	s := `
@@ -226,6 +238,35 @@ func (m *ConnectModel) ReadLog() ([]*models.Log, error) {
 		return nil, errors.Wrap(err, "error iterating over rows")
 	}
 	return log, nil
+}
+
+func (m *ConnectModel) ReadContact() ([]*models.Contact, error) {
+	s := `
+    SELECT name, number, email
+    FROM contact
+    `
+	rows, err := m.DB.Query(s)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	contact := []*models.Contact{}
+
+	for rows.Next() {
+		q := &models.Contact{}
+		err = rows.Scan(&q.Name, &q.Number, &q.Email)
+		if err != nil {
+			return nil, errors.Wrap(err, "error Scanning row")
+		}
+
+		contact = append(contact, q)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, errors.Wrap(err, "error iterating over rows")
+	}
+	return contact, nil
 }
 
 func (m *ConnectModel) Notification(username string) ([]*models.Notification, error) {

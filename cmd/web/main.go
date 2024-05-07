@@ -13,11 +13,11 @@ import (
 func setUpDB() (*sql.DB, error) {
 	// Provide the credentials for our database
 	const (
-		host     = "localhost"
+		host     = "bubble.db.elephantsql.com"
 		port     = 5432
-		user     = "ub"
-		password = "iamme"
-		dbname   = "ubcampussafty"
+		user     = "xqymnerr"
+		password = "Xgtj9QRe3ouBnLW1WN-9C_g4_DDWefMr"
+		dbname   = "xqymnerr"
 	)
 
 	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=require",
@@ -82,12 +82,14 @@ func main() {
 	mux.HandleFunc("/reports", app.reports)
 	mux.HandleFunc("/panic", app.panic)
 	mux.HandleFunc("/profile", app.profile)
-	mux.HandleFunc("/call", app.call)
 	mux.HandleFunc("/report-add", app.createReport)
 	mux.HandleFunc("/guard-report-add", app.guardcreateReport)
 	mux.HandleFunc("/add-user", app.addNewuser)
+	mux.HandleFunc("/add-contact", app.addContact)
 	mux.HandleFunc("/create-user", app.createuser)
+	mux.HandleFunc("/create-contact", app.createContact)
 	mux.HandleFunc("/view-reports", app.viewreport)
+	mux.HandleFunc("/view-contact", app.viewContact)
 	mux.HandleFunc("/guard-reports", app.guardreports)
 	mux.HandleFunc("/view-log", app.viewlog)
 	mux.HandleFunc("/check-in-out", app.checkinout)

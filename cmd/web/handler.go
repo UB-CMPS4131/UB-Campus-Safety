@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 
+	models "amencia.net/ubb-campus-safety-main/pkg/model"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -118,6 +119,23 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 
 func (app *application) addNotices(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles("./ui/admin/addNotice.tmpl")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	err = ts.Execute(w, nil)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+	}
+}
+func (app *application) addContact(w http.ResponseWriter, r *http.Request) {
+	ts, err := template.ParseFiles("./ui/admin/addContact.tmpl")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -350,24 +368,6 @@ func (app *application) profile(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *application) call(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("./ui/student/call.tmpl")
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w,
-			http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-		return
-	}
-	err = ts.Execute(w, nil)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w,
-			http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-	}
-}
-
 func (app *application) addNewuser(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles("./ui/admin/adduser.tmpl")
 	if err != nil {
@@ -528,6 +528,53 @@ func (app *application) viewreport(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (app *application) viewContact(w http.ResponseWriter, r *http.Request) {
+	q, err := app.ubcs.ReadContact()
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+
+	not, err := app.ubcs.Notification(app.Username)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+
+	// Display the quotes using a template
+	ts, err := template.ParseFiles("./ui/student/call.tmpl")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+
+	data := struct {
+		Contacts      []*models.Contact
+		Notifications []*models.Notification
+	}{
+		Contacts:      q,
+		Notifications: not,
+	}
+
+	err = ts.Execute(w, data)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+}
+
 func (app *application) view_report(w http.ResponseWriter, r *http.Request) {
 	q, err := app.ubcs.ReadReport()
 	if err != nil {
@@ -603,7 +650,6 @@ func (app *application) checkinout(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 	}
 }
-
 func (app *application) createReport(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Redirect(w, r, "/reports", http.StatusSeeOther)
@@ -879,4 +925,55 @@ func (app *application) createnotice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/add-notice", http.StatusSeeOther)
+}
+
+func (app *application) createContact(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Redirect(w, r, "/add-contact", http.StatusSeeOther)
+		return
+	}
+
+	name := r.FormValue("name")
+	pnumber := r.FormValue("number")
+	email := r.FormValue("email")
+
+	// check the web form fields for validity
+	errors := make(map[string]string)
+	// check each field
+
+	if name = strings.TrimSpace(name); name == "" {
+		errors["name"] = "This field cannot be left blank"
+	} else if len(name) > 75 {
+		errors["name"] = "This field is too long (maximum is 75 characters)"
+	}
+	if pnumber = strings.TrimSpace(pnumber); pnumber == "" {
+		errors["number"] = "This field cannot be left blank"
+	} else if len(pnumber) > 25 {
+		errors["number"] = "This field is too long (maximum is 25 characters)"
+	}
+	if email = strings.TrimSpace(email); email == "" {
+		errors["email"] = "This field cannot be left blank"
+	} else if len(email) > 50 {
+		errors["email"] = "This field is too long (maximum is 50 characters)"
+	}
+	// check if there are any errors in the map
+	if len(errors) > 0 {
+		fmt.Fprintln(w, "Validation errors:")
+		for field, errorMsg := range errors {
+			fmt.Fprintf(w, "- %s: %s\n", field, errorMsg)
+		}
+		return
+	}
+
+	// Declare err variable
+	var err error
+
+	// Insert the report
+	_, err = app.ubcs.InsertContact(name, pnumber, email)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, "/add-contact", http.StatusSeeOther)
 }

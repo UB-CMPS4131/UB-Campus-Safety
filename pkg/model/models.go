@@ -51,8 +51,14 @@ type Notification struct {
 	Created_at     time.Time
 }
 
-type Notification_Seen struct {
-	notification_id int
-	user_id         int
-	seen_at         time.Time
+type Contact struct {
+	Name   string
+	Number string
+	Email  string
 }
+
+// type Notification_Seen struct {
+// 	notification_id int
+// 	user_id         int
+// 	seen_at         time.Time
+// }

@@ -31,7 +31,7 @@ CREATE TABLE LOGIN (
     id SERIAL PRIMARY KEY,
     memberID INTEGER REFERENCES PersonnelInfoTable(id),
     username VARCHAR(50) NOT NULL,
-    password VARCHAR(255) NOT NULL,
+    password bytea NOT NULL,
     role INTEGER REFERENCES ROLES(role_id),
     pastPasswords TEXT -- Assuming pastPasswords will store multiple passwords separated by a delimiter
 );
@@ -65,6 +65,12 @@ CREATE TABLE notification (
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE contact (
+    contact_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    number text NOT NULL,
+    email text NOT NULL
+);
 CREATE TABLE notification_seen (
     notification_id SERIAL PRIMARY KEY,
     user_id integer NOT NULL,
@@ -84,4 +90,4 @@ VALUES ('https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-compute
 
 INSERT INTO LOGIN (memberID, username, password, Role, pastPasswords)
 VALUES 
-    (1, 'john_doe', '12345678', 1, '');
+    (1, 'john_doe', '\x243261243132244433486c35644f4979624735666864684c583141662e486c634d72687945564b753177794c47674d76726b314b35625a4257575961', 1, '');
