@@ -77,8 +77,10 @@ func (m *ConnectModel) UsernameExists(username string) (bool, error) {
 // ReadReport fetches reports from the database
 func (m *ConnectModel) ReadReport() ([]*models.Report, error) {
 	s := `
-        SELECT person_name, type_of_incident, location, description, imagename, imagedata
-        FROM report
+	SELECT person_name, type_of_incident, location, description, imagename, imagedata
+	FROM report
+	ORDER BY  report_id DESC
+	
     `
 	rows, err := m.DB.Query(s)
 	if err != nil {
@@ -215,6 +217,7 @@ func (m *ConnectModel) ReadLog() ([]*models.Log, error) {
 	s := `
     SELECT person_name, log_date, log_time, check_type
     FROM log
+	ORDER BY id DESC
     `
 	rows, err := m.DB.Query(s)
 	if err != nil {
@@ -280,7 +283,8 @@ func (m *ConnectModel) Notification(username string) ([]*models.Notification, er
 	FROM notification n
 	LEFT JOIN notification_seen ns ON n.notification_id = ns.notification_id AND ns.user_id = $1
 	WHERE ns.notification_id IS NULL
-	ORDER BY n.notification_id DESC;`
+	ORDER BY n.notification_id DESC;
+	`
 
 	rows, err := m.DB.Query(s, memberID)
 	if err != nil {

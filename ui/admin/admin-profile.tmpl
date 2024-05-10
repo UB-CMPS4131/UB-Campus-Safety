@@ -64,12 +64,12 @@
 					<span class="text">Profile</span>
 				</a>
 			</li>
-      <li>
-				<a href="/">
-					<span class="icon"><i class="fa fa-arrow-left"></i></span>
-					<span class="text">Logout</span>
-				</a>
-			</li>
+			<li>
+				{{ if .IsAuthenticated }}
+				<a href="/user/logout" method="POST"> <span class="icon"><i class="fa fa-arrow-left"></i></span>
+				  <span class="text">Logout</span> </a>
+				{{ end }}
+			  </li>
     
 
 		</ul>
@@ -79,7 +79,7 @@
     <!-- Profile Display -->
     <!-- Profile Display -->
     <div class="profile">
-        {{range .}}
+        {{range .DATA}}
             <div class="profile-info">
                 <!-- Display the profile image -->
                 <img src="data:{{.MimeType}};base64,{{.EncodedImage}}" alt="Profile Picture">

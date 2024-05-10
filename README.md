@@ -23,6 +23,7 @@ The University of Belize grapples with a multifaceted challenge regarding the sa
 ### Admin
 
 - Add Notice
+- Add Contact
 - Add User
 - View Report
 - View Log
@@ -32,13 +33,14 @@ The University of Belize grapples with a multifaceted challenge regarding the sa
 ### Student
 
 - Add a Report
+- View Contacts
 - view Profile
 - View Notice
 
 
 ### Guard
 
-- Add check-in / check-out
+- Work Log
 - Add a report
 - View report
 - View Profile

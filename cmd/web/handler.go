@@ -2,7 +2,7 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
+	"errors"
 	"io"
 	"strings"
 	"time"
@@ -12,95 +12,17 @@ import (
 	"net/http"
 
 	models "amencia.net/ubb-campus-safety-main/pkg/model"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func (app *application) login(w http.ResponseWriter, r *http.Request) {
+
+	data := &templateData{
+
+		IsAuthenticated: app.isAuthenticated(r),
+	}
+
 	ts, err := template.ParseFiles("./ui/html/login.tmpl")
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w,
-			http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-		return
-	}
-	err = ts.Execute(w, nil)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w,
-			http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-	}
-}
 
-func (app *application) verification(w http.ResponseWriter, r *http.Request) {
-	var data struct {
-		ErrorMessage string
-	}
-
-	if r.Method != http.MethodPost {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	err := r.ParseForm()
-	if err != nil {
-		data.ErrorMessage = http.StatusText(http.StatusBadRequest)
-		renderTemplate(w, "./ui/html/login.tmpl", data)
-		return
-	}
-
-	username := r.PostForm.Get("username")
-	password := r.PostForm.Get("password")
-
-	// Fetch user credentials from the database
-	var storedPassword []byte
-	var role int
-	var memberID int // Added memberID variable
-	err = app.ubcs.DB.QueryRow("SELECT password, role, memberID FROM LOGIN WHERE username = $1", username).Scan(&storedPassword, &role, &memberID)
-	if err == sql.ErrNoRows {
-		data.ErrorMessage = "Invalid username or password"
-		renderTemplate(w, "./ui/html/login.tmpl", data)
-		return
-	}
-
-	err = bcrypt.CompareHashAndPassword(storedPassword, []byte(password))
-	if err != nil {
-		data.ErrorMessage = "Invalid username or password"
-		renderTemplate(w, "./ui/html/login.tmpl", data)
-		return
-	}
-
-	// Fetch first name and last name from PersonnelInfoTable based on memberID
-	var personName string
-	row := app.ubcs.DB.QueryRow("SELECT CONCAT(FName, ' ', LName) FROM PersonnelInfoTable WHERE id = $1 LIMIT 1", memberID)
-	err = row.Scan(&personName)
-	if err == sql.ErrNoRows {
-		data.ErrorMessage = "User not found in PersonnelInfoTable"
-		renderTemplate(w, "./ui/html/login.tmpl", data)
-		return
-	}
-
-	// Set PersonName in the application struct
-	app.PersonName = personName
-	app.Username = username
-	app.MemberID = memberID
-
-	// Render specific template based on role
-	switch role {
-	case 1: // Assuming role 1 is for normal users
-		http.Redirect(w, r, "/add-notice", http.StatusSeeOther)
-	case 2: // Assuming role 2 is for admin users
-		http.Redirect(w, r, "/student", http.StatusSeeOther)
-	case 3: // Assuming role 3 is for guard users
-		http.Redirect(w, r, "/guard", http.StatusSeeOther)
-	default:
-		http.Error(w, "Invalid role", http.StatusInternalServerError)
-	}
-}
-
-func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
-	ts, err := template.ParseFiles(tmpl)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -117,7 +39,132 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 	}
 }
 
+func (app *application) isAuthenticated(r *http.Request) bool {
+	return app.session.Exists(r, "authenticatedUserID")
+}
+
+func (app *application) verification(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	username := r.PostForm.Get("username")
+	password := r.PostForm.Get("password")
+	// check the web form fields to validity
+	errors_user := make(map[string]string)
+	id, err := app.users.Authenticate(username, password)
+	if err != nil {
+		if errors.Is(err, models.ErrInvalidCredentials) {
+			errors_user["default"] = "Email or Password is incorrect"
+			// rerender the login form
+			ts, err := template.ParseFiles("./ui/html/login.page.tmpl")
+			if err != nil {
+				log.Println(err.Error())
+				http.Error(w,
+					http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+				return
+			}
+			err = ts.Execute(w, &templateData{
+				ErrorsFromForm:  errors_user,
+				FormData:        r.PostForm,
+				IsAuthenticated: app.isAuthenticated(r),
+			})
+
+			if err != nil {
+				log.Println(err.Error())
+				http.Error(w,
+					http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	role, memberID, err := app.users.FetchUserRoleAndID(id)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	// Fetch first name and last name from PersonnelInfoTable based on memberID
+	var personName string
+	row := app.ubcs.DB.QueryRow("SELECT CONCAT(FName, ' ', LName) FROM PersonnelInfoTable WHERE id = $1 LIMIT 1", memberID)
+	err = row.Scan(&personName)
+	if err == sql.ErrNoRows {
+		renderTemplate(w, "./ui/html/login.tmpl", err)
+		log.Println(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+
+	}
+
+	// Set PersonName in the application struct
+	app.PersonName = personName
+	app.Username = username
+	app.MemberID = memberID
+	// Redirect to the appropriate route based on role
+	switch role {
+	case 1: // Assuming role 1 is for normal users
+		app.session.Put(r, "authenticatedUserID", id)
+		http.Redirect(w, r, "/add-notice", http.StatusSeeOther)
+	case 2: // Assuming role 2 is for admin users
+		app.session.Put(r, "authenticatedUserID", id)
+		http.Redirect(w, r, "/student", http.StatusSeeOther)
+	case 3: // Assuming role 3 is for guard users
+		app.session.Put(r, "authenticatedUserID", id)
+		http.Redirect(w, r, "/guard", http.StatusSeeOther)
+	default:
+		app.session.Put(r, "authenticatedUserID", id)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+}
+
+func (app *application) requireAuthentication(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !app.isAuthenticated(r) {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+		w.Header().Add("Cache-Control", "no-store")
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
+	app.session.Remove(r, "authenticatedUserID")
+	app.session.Put(r, "flash", "You have been logged out successfully")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
+	ts, err := template.ParseFiles(tmpl)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+
+	err = ts.Execute(w, data)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+	}
+}
+
 func (app *application) addNotices(w http.ResponseWriter, r *http.Request) {
+
 	ts, err := template.ParseFiles("./ui/admin/addNotice.tmpl")
 	if err != nil {
 		log.Println(err.Error())
@@ -126,7 +173,11 @@ func (app *application) addNotices(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	err = ts.Execute(w, nil)
+
+	err = ts.Execute(w, &templateData{
+		IsAuthenticated: app.isAuthenticated(r),
+	})
+
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -134,7 +185,9 @@ func (app *application) addNotices(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 	}
 }
+
 func (app *application) addContact(w http.ResponseWriter, r *http.Request) {
+
 	ts, err := template.ParseFiles("./ui/admin/addContact.tmpl")
 	if err != nil {
 		log.Println(err.Error())
@@ -143,7 +196,9 @@ func (app *application) addContact(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	err = ts.Execute(w, nil)
+	err = ts.Execute(w, &templateData{
+		IsAuthenticated: app.isAuthenticated(r),
+	})
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -153,6 +208,7 @@ func (app *application) addContact(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) student(w http.ResponseWriter, r *http.Request) {
+
 	ts, err := template.ParseFiles("./ui/student/reports.tmpl")
 	if err != nil {
 		log.Println(err.Error())
@@ -161,12 +217,15 @@ func (app *application) student(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
+
 	not, err := app.ubcs.Notification(app.Username)
 	if err != nil {
 		println("ERROR:" + err.Error())
 	}
-
-	err = ts.Execute(w, not)
+	err = ts.Execute(w, &templateData{
+		Notifications:   not,
+		IsAuthenticated: app.isAuthenticated(r),
+	})
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -176,6 +235,7 @@ func (app *application) student(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) guard(w http.ResponseWriter, r *http.Request) {
+
 	ts, err := template.ParseFiles("./ui/guard/checkinout.tmpl")
 	if err != nil {
 		log.Println(err.Error())
@@ -184,7 +244,9 @@ func (app *application) guard(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	err = ts.Execute(w, nil)
+	err = ts.Execute(w, &templateData{
+		IsAuthenticated: app.isAuthenticated(r),
+	})
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -202,12 +264,16 @@ func (app *application) reports(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
+
 	not, err := app.ubcs.Notification(app.Username)
 	if err != nil {
-		println("ERROR:" + err.Error())
+		log.Println("ERROR:", err.Error())
 	}
 
-	err = ts.Execute(w, not)
+	err = ts.Execute(w, &templateData{
+		Notifications:   not,
+		IsAuthenticated: app.isAuthenticated(r),
+	})
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -244,8 +310,10 @@ func (app *application) guard_profile(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-
-	err = ts.Execute(w, profiles.DATA)
+	err = ts.Execute(w, &templateData{
+		DATA:            profiles.DATA, // Pass the actual profile data here
+		IsAuthenticated: app.isAuthenticated(r),
+	})
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -254,6 +322,7 @@ func (app *application) guard_profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
 func (app *application) admin_profile(w http.ResponseWriter, r *http.Request) {
 	// Retrieve the username from the request context or session
 	username := app.Username
@@ -282,8 +351,10 @@ func (app *application) admin_profile(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-
-	err = ts.Execute(w, profiles.DATA)
+	err = ts.Execute(w, &templateData{
+		DATA:            profiles.DATA, // Pass the actual profile data here
+		IsAuthenticated: app.isAuthenticated(r),
+	})
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -302,7 +373,9 @@ func (app *application) guardreports(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	err = ts.Execute(w, nil)
+	err = ts.Execute(w, &templateData{
+		IsAuthenticated: app.isAuthenticated(r),
+	})
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -334,7 +407,7 @@ func (app *application) profile(w http.ResponseWriter, r *http.Request) {
 	username := app.Username
 
 	// Pass the username to the ReadProfile method to fetch the profile
-	profiles, err := app.ubcs.ReadProfile(username, true)
+	profiles, err := app.ubcs.ReadProfile(username, false)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -357,8 +430,16 @@ func (app *application) profile(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
+	not, err := app.ubcs.Notification(app.Username)
+	if err != nil {
+		log.Println("ERROR:", err.Error())
+	}
 
-	err = ts.Execute(w, profiles)
+	err = ts.Execute(w, &templateData{
+		Notifications:   not,
+		DATA:            profiles.DATA, // Pass the actual profile data here
+		IsAuthenticated: app.isAuthenticated(r),
+	})
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -377,7 +458,9 @@ func (app *application) addNewuser(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	err = ts.Execute(w, nil)
+	err = ts.Execute(w, &templateData{
+		IsAuthenticated: app.isAuthenticated(r),
+	})
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -387,10 +470,6 @@ func (app *application) addNewuser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) createuser(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Redirect(w, r, "/add-user", http.StatusSeeOther)
-		return
-	}
 
 	err := r.ParseMultipartForm(10 << 20) //10 MB limit for filesize
 	if err != nil {
@@ -482,9 +561,25 @@ func (app *application) createuser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(errors) > 0 {
-		fmt.Fprintln(w, "Validation errors:")
-		for field, errorMsg := range errors {
-			fmt.Fprintf(w, "- %s: %s\n", field, errorMsg)
+		ts, err := template.ParseFiles("./ui/admin/adduser.tmpl")
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+
+		}
+		err = ts.Execute(w, &templateData{
+			ErrorsFromForm:  errors,
+			FormData:        r.PostForm,
+			IsAuthenticated: app.isAuthenticated(r),
+		})
+
+		if err != nil {
+			log.Println(err.Error())
+			log.Println(err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+
 		}
 		return
 	}
@@ -500,6 +595,7 @@ func (app *application) createuser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) viewreport(w http.ResponseWriter, r *http.Request) {
+
 	q, err := app.ubcs.ReadReport()
 	if err != nil {
 		log.Println(err.Error())
@@ -517,7 +613,10 @@ func (app *application) viewreport(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	err = ts.Execute(w, q)
+	err = ts.Execute(w, &templateData{
+		Reports:         q,
+		IsAuthenticated: app.isAuthenticated(r),
+	})
 
 	if err != nil {
 		log.Println(err.Error())
@@ -557,15 +656,11 @@ func (app *application) viewContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := struct {
-		Contacts      []*models.Contact
-		Notifications []*models.Notification
-	}{
-		Contacts:      q,
-		Notifications: not,
-	}
-
-	err = ts.Execute(w, data)
+	err = ts.Execute(w, &templateData{
+		Contacts:        q,
+		Notifications:   not,
+		IsAuthenticated: app.isAuthenticated(r),
+	})
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -593,7 +688,10 @@ func (app *application) view_report(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	err = ts.Execute(w, q)
+	err = ts.Execute(w, &templateData{
+		Reports:         q,
+		IsAuthenticated: app.isAuthenticated(r),
+	})
 
 	if err != nil {
 		log.Println(err.Error())
@@ -605,6 +703,7 @@ func (app *application) view_report(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) viewlog(w http.ResponseWriter, r *http.Request) {
+
 	q, err := app.ubcs.ReadLog()
 	if err != nil {
 		log.Println(err.Error())
@@ -622,7 +721,11 @@ func (app *application) viewlog(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	err = ts.Execute(w, q)
+
+	err = ts.Execute(w, &templateData{
+		Logs:            q,
+		IsAuthenticated: app.isAuthenticated(r),
+	})
 
 	if err != nil {
 		log.Println(err.Error())
@@ -642,7 +745,9 @@ func (app *application) checkinout(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	err = ts.Execute(w, nil)
+	err = ts.Execute(w, &templateData{
+		IsAuthenticated: app.isAuthenticated(r),
+	})
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -651,10 +756,6 @@ func (app *application) checkinout(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func (app *application) createReport(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Redirect(w, r, "/reports", http.StatusSeeOther)
-		return
-	}
 
 	err := r.ParseMultipartForm(10 << 20) // 10 MB limit for file size
 	if err != nil {
@@ -723,9 +824,25 @@ func (app *application) createReport(w http.ResponseWriter, r *http.Request) {
 
 	// check if there are any errors in the map
 	if len(errors) > 0 {
-		fmt.Fprintln(w, "Validation errors:")
-		for field, errorMsg := range errors {
-			fmt.Fprintf(w, "- %s: %s\n", field, errorMsg)
+		ts, err := template.ParseFiles("./ui/student/reports.tmpl")
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+
+		}
+		err = ts.Execute(w, &templateData{
+			ErrorsFromForm:  errors,
+			FormData:        r.PostForm,
+			IsAuthenticated: app.isAuthenticated(r),
+		})
+
+		if err != nil {
+			log.Println(err.Error())
+			log.Println(err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+
 		}
 		return
 	}
@@ -740,10 +857,6 @@ func (app *application) createReport(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) guardcreateReport(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Redirect(w, r, "/guard-reports", http.StatusSeeOther)
-		return
-	}
 
 	err := r.ParseMultipartForm(10 << 20) // 10 MB limit for file size
 	if err != nil {
@@ -812,9 +925,25 @@ func (app *application) guardcreateReport(w http.ResponseWriter, r *http.Request
 
 	// check if there are any errors in the map
 	if len(errors) > 0 {
-		fmt.Fprintln(w, "Validation errors:")
-		for field, errorMsg := range errors {
-			fmt.Fprintf(w, "- %s: %s\n", field, errorMsg)
+		ts, err := template.ParseFiles("./ui/guard/guard-report.tmpl")
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+
+		}
+		err = ts.Execute(w, &templateData{
+			ErrorsFromForm:  errors,
+			FormData:        r.PostForm,
+			IsAuthenticated: app.isAuthenticated(r),
+		})
+
+		if err != nil {
+			log.Println(err.Error())
+			log.Println(err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+
 		}
 		return
 	}
@@ -829,10 +958,6 @@ func (app *application) guardcreateReport(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) createLog(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Redirect(w, r, "/check-in-out", http.StatusSeeOther)
-		return
-	}
 
 	logDate := r.FormValue("date")
 	logTime := r.FormValue("time")
@@ -861,13 +986,28 @@ func (app *application) createLog(w http.ResponseWriter, r *http.Request) {
 	}
 	// check if there are any errors in the map
 	if len(errors) > 0 {
-		fmt.Fprintln(w, "Validation errors:")
-		for field, errorMsg := range errors {
-			fmt.Fprintf(w, "- %s: %s\n", field, errorMsg)
+		ts, err := template.ParseFiles("./ui/guard/checkinout.tmpl")
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+
+		}
+		err = ts.Execute(w, &templateData{
+			ErrorsFromForm:  errors,
+			FormData:        r.PostForm,
+			IsAuthenticated: app.isAuthenticated(r),
+		})
+
+		if err != nil {
+			log.Println(err.Error())
+			log.Println(err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+
 		}
 		return
 	}
-
 	// Declare err variable
 	var err error
 
@@ -882,10 +1022,6 @@ func (app *application) createLog(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) createnotice(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Redirect(w, r, "/add-notice", http.StatusSeeOther)
-		return
-	}
 
 	title := r.FormValue("title")
 	message := r.FormValue("message")
@@ -907,9 +1043,25 @@ func (app *application) createnotice(w http.ResponseWriter, r *http.Request) {
 	}
 	// check if there are any errors in the map
 	if len(errors) > 0 {
-		fmt.Fprintln(w, "Validation errors:")
-		for field, errorMsg := range errors {
-			fmt.Fprintf(w, "- %s: %s\n", field, errorMsg)
+		ts, err := template.ParseFiles("./ui/admin/addNotice.tmpl")
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+
+		}
+		err = ts.Execute(w, &templateData{
+			ErrorsFromForm:  errors,
+			FormData:        r.PostForm,
+			IsAuthenticated: app.isAuthenticated(r),
+		})
+
+		if err != nil {
+			log.Println(err.Error())
+			log.Println(err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+
 		}
 		return
 	}
@@ -928,10 +1080,6 @@ func (app *application) createnotice(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) createContact(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Redirect(w, r, "/add-contact", http.StatusSeeOther)
-		return
-	}
 
 	name := r.FormValue("name")
 	pnumber := r.FormValue("number")
@@ -956,11 +1104,26 @@ func (app *application) createContact(w http.ResponseWriter, r *http.Request) {
 	} else if len(email) > 50 {
 		errors["email"] = "This field is too long (maximum is 50 characters)"
 	}
-	// check if there are any errors in the map
 	if len(errors) > 0 {
-		fmt.Fprintln(w, "Validation errors:")
-		for field, errorMsg := range errors {
-			fmt.Fprintf(w, "- %s: %s\n", field, errorMsg)
+		ts, err := template.ParseFiles("./ui/admin/addContact.tmpl")
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+
+		}
+		err = ts.Execute(w, &templateData{
+			ErrorsFromForm:  errors,
+			FormData:        r.PostForm,
+			IsAuthenticated: app.isAuthenticated(r),
+		})
+
+		if err != nil {
+			log.Println(err.Error())
+			log.Println(err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+
 		}
 		return
 	}

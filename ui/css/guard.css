@@ -229,6 +229,7 @@ section ul li img {
 
 /* Profile Section Styling */
 
+
 .profile {
   margin-top: 80px; /* Adjust spacing from the top navbar */
   margin-left: 80px; /* Adjust spacing from the sidebar */
@@ -250,6 +251,9 @@ section ul li img {
   border-radius: 50%; /* Make the image round */
   object-fit: cover; /* Ensure the image covers the entire space */
 }
+/* styles.css */
+
+
 
 /* Adjustments for smaller screens */
 /* Centering the section for report on smartphones */

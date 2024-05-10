@@ -58,11 +58,11 @@
                     </a>
                 </li>
                 <li>
-                    <a href="/">
-                        <span class="icon"><i class="fa fa-arrow-left"></i></span>
-                        <span class="text">Logout</span>
-                    </a>
-                </li>
+                    {{ if .IsAuthenticated }}
+                    <a href="/user/logout" method="POST"> <span class="icon"><i class="fa fa-arrow-left"></i></span>
+                      <span class="text">Logout</span> </a>
+                    {{ end }}
+                  </li>
             </ul>
         </div>
     </div>
@@ -70,9 +70,7 @@
 <section>
     <h3>Reports</h3>
     <ul>
-        <div id="notification_window">
-        {{ range . }}
-        <div class="notification-item">
+        {{ range .Reports }}
         <li>
             <strong>Person Name:</strong> {{ .PersonName }}<br>
             <strong>Type of Incident:</strong> {{ .TypeOfIncident }}<br>

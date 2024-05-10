@@ -2,11 +2,16 @@ package main
 
 import (
 	"database/sql"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"amencia.net/ubb-campus-safety-main/pkg/model/postgresql"
+	"github.com/bmizerany/pat"
+	"github.com/golangcollege/sessions"
+	"github.com/justinas/alice"
 	_ "github.com/lib/pq" // Third party package
 )
 
@@ -39,7 +44,9 @@ func setUpDB() (*sql.DB, error) {
 // Dependency Injection (passing)
 type application struct {
 	ubcs       *postgresql.ConnectModel
+	users      *postgresql.UserModel
 	PersonName string
+	session    *sessions.Session
 	Username   string
 	MemberID   int
 }
@@ -50,55 +57,66 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.Close() // Always do this before exiting
+	secret := flag.String("secret", "p7Mhd+qQamgHsS*+8Tg7mNXtcjvu@egz", "Secret key")
+	session := sessions.New([]byte(*secret))
+	session.Lifetime = 12 * time.Hour
+	session.Secure = true
 	app := &application{
 		ubcs: &postgresql.ConnectModel{
 			DB: db,
 		},
+		session: session,
+		users: &postgresql.UserModel{
+			DB: db,
+		},
 	}
 
-	mux := http.NewServeMux()
+	dynamicMiddleware := alice.New(app.session.Enable)
+
+	mux := pat.New()
 	// Serve HTML files
 	htmlDir := http.Dir("ui/html")
 	htmlFS := http.FileServer(htmlDir)
-	mux.Handle("/html/", http.StripPrefix("/html/", htmlFS))
+	mux.Get("/html/", http.StripPrefix("/html/", htmlFS))
 
 	jsDir := http.Dir("ui/js")
 	jsFS := http.FileServer(jsDir)
-	mux.Handle("/js/", http.StripPrefix("/js/", jsFS))
+	mux.Get("/js/", http.StripPrefix("/js/", jsFS))
 
 	imgDir := http.Dir("ui/images")
 	imgFS := http.FileServer(imgDir)
-	mux.Handle("/images/", http.StripPrefix("/images/", imgFS))
+	mux.Get("/images/", http.StripPrefix("/images/", imgFS))
 
 	// Serve CSS files
 	cssDir := http.Dir("ui/css")
 	cssFS := http.FileServer(cssDir)
-	mux.Handle("/css/", http.StripPrefix("/css/", cssFS))
+	mux.Get("/css/", http.StripPrefix("/css/", cssFS))
 
-	mux.HandleFunc("/", app.login)
-	mux.HandleFunc("/login", app.verification)
-	mux.HandleFunc("/student", app.student)
-	mux.HandleFunc("/guard", app.guard)
-	mux.HandleFunc("/reports", app.reports)
-	mux.HandleFunc("/panic", app.panic)
-	mux.HandleFunc("/profile", app.profile)
-	mux.HandleFunc("/report-add", app.createReport)
-	mux.HandleFunc("/guard-report-add", app.guardcreateReport)
-	mux.HandleFunc("/add-user", app.addNewuser)
-	mux.HandleFunc("/add-contact", app.addContact)
-	mux.HandleFunc("/create-user", app.createuser)
-	mux.HandleFunc("/create-contact", app.createContact)
-	mux.HandleFunc("/view-reports", app.viewreport)
-	mux.HandleFunc("/view-contact", app.viewContact)
-	mux.HandleFunc("/guard-reports", app.guardreports)
-	mux.HandleFunc("/view-log", app.viewlog)
-	mux.HandleFunc("/check-in-out", app.checkinout)
-	mux.HandleFunc("/guard-view-report", app.view_report)
-	mux.HandleFunc("/guard-profile", app.guard_profile)
-	mux.HandleFunc("/admin-profile", app.admin_profile)
-	mux.HandleFunc("/create-log", app.createLog)
-	mux.HandleFunc("/create-notice", app.createnotice)
-	mux.HandleFunc("/add-notice", app.addNotices)
+	mux.Get("/", dynamicMiddleware.ThenFunc(app.login))
+	mux.Post("/login", dynamicMiddleware.ThenFunc(app.verification))
+	mux.Get("/student", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.student))
+	mux.Get("/guard", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.guard))
+	mux.Get("/reports", dynamicMiddleware.ThenFunc(app.reports))
+	mux.Get("/panic", dynamicMiddleware.ThenFunc(app.panic))
+	mux.Get("/profile", dynamicMiddleware.ThenFunc(app.profile))
+	mux.Post("/report-add", dynamicMiddleware.ThenFunc(app.createReport))
+	mux.Post("/guard-report-add", dynamicMiddleware.ThenFunc(app.guardcreateReport))
+	mux.Get("/add-user", dynamicMiddleware.ThenFunc(app.addNewuser))
+	mux.Get("/add-contact", dynamicMiddleware.ThenFunc(app.addContact))
+	mux.Post("/create-user", dynamicMiddleware.ThenFunc(app.createuser))
+	mux.Post("/create-contact", dynamicMiddleware.ThenFunc(app.createContact))
+	mux.Get("/view-reports", dynamicMiddleware.ThenFunc(app.viewreport))
+	mux.Get("/view-contact", dynamicMiddleware.ThenFunc(app.viewContact))
+	mux.Get("/guard-reports", dynamicMiddleware.ThenFunc(app.guardreports))
+	mux.Get("/view-log", dynamicMiddleware.ThenFunc(app.viewlog))
+	mux.Get("/check-in-out", dynamicMiddleware.ThenFunc(app.checkinout))
+	mux.Get("/guard-view-report", dynamicMiddleware.ThenFunc(app.view_report))
+	mux.Get("/guard-profile", dynamicMiddleware.ThenFunc(app.guard_profile))
+	mux.Get("/admin-profile", dynamicMiddleware.ThenFunc(app.admin_profile))
+	mux.Post("/create-log", dynamicMiddleware.ThenFunc(app.createLog))
+	mux.Post("/create-notice", dynamicMiddleware.ThenFunc(app.createnotice))
+	mux.Get("/add-notice", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.addNotices))
+	mux.Get("/user/logout", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.logoutUser))
 
 	log.Println("Starting server on port :8080")
 	err = http.ListenAndServe(":8080", mux)

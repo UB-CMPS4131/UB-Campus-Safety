@@ -57,12 +57,12 @@
 					<span class="text">Profile</span>
 				</a>
 			</li>
-      		<li>
-				<a href="/">
-					<span class="icon"><i class="fa fa-arrow-left"></i></span>
-					<span class="text">Logout</span>
-				</a>
-			</li>
+			<li>
+				{{ if .IsAuthenticated }}
+				<a href="/user/logout" method="POST"> <span class="icon"><i class="fa fa-arrow-left"></i></span>
+				  <span class="text">Logout</span> </a>
+				{{ end }}
+			  </li>
     	</ul>
 		</div>
 	</div>
@@ -71,7 +71,7 @@
 <section>
     <h3> Check in / check out Log's</h3>
     <ul>
-        {{ range . }}
+        {{ range .Logs }}
         <li>
             <strong>Name:</strong> {{ .PersonName }}<br>
             <strong>Date:</strong> {{ .LogDate.Format "2006-01-02" }}<br>

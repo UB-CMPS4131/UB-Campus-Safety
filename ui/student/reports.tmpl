@@ -64,14 +64,14 @@
             
         <!-- Notification window -->
         <div class="notification" id="notification_window" style="display: none;">
-            {{range .}} <!-- Updated field name here -->
-                <div class="notification-item">
-                  <p><strong>{{.Title}}</strong></p>
-                  <p><strong>Posted:</strong> {{.Created_at.Format "2006-01-02"}}</p>
-                  <p>{{.Message}}</p>
-                </div>
-            {{end}}
-        </div>
+          {{ range .Notifications }}
+          <div class="notification-item">
+              <p><strong>{{.Title}}</strong></p>
+              <p><strong>Posted:</strong> {{.Created_at.Format "2006-01-02"}}</p>
+              <p>{{.Message}}</p>
+          </div>
+          {{ end }}
+      </div>
 	<div class="sidebar">
 		<div class="sidebar_inner">
 		<ul>
@@ -95,11 +95,11 @@
 				</a>
 			</li>
       <li>
-				<a href="/">
-					<span class="icon"><i class="fa fa-arrow-left"></i></span>
-					<span class="text">Logout</span>
-				</a>
-			</li>
+        {{ if .IsAuthenticated }}
+        <a href="/user/logout" method="POST"> <span class="icon"><i class="fa fa-arrow-left"></i></span>
+          <span class="text">Logout</span> </a>
+        {{ end }}
+      </li>
 		</ul>
 		</div>
 	</div>
@@ -188,13 +188,6 @@
                 item.classList.toggle('expanded');
             });
         });
-
-          // Reorder notifications in descending order
-  var notifications = document.querySelectorAll('.notification-item');
-  var notificationContainer = document.getElementById('notification_window');
-  for (var i = notifications.length - 1; i >= 0; i--) {
-      notificationContainer.appendChild(notifications[i]);
-  }
 </script>
 
 </body>

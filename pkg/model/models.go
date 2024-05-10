@@ -1,15 +1,31 @@
 package models
 
 import (
+	"errors"
 	"time"
 )
 
-type LoginCredentials struct {
-	MemberID      int
-	Username      string
-	Password      string
-	Role_Name     int
-	PastPasswords string
+var (
+	ErrRecordNotFound     = errors.New("models: no matching record found")
+	ErrInvalidCredentials = errors.New("models: invalid credentials")
+	ErrDuplicateEmail     = errors.New("models: duplicate email")
+)
+
+// type LoginCredentials struct {
+// 	MemberID      int
+// 	Username      string
+// 	Password      string
+// 	Role_Name     int
+// 	PastPasswords string
+// }
+
+type User struct {
+	ID             int
+	MemberID       int
+	Username       string
+	HashedPassword []byte
+	Role_Name      int
+	Active         bool
 }
 
 type Report struct {
