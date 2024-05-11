@@ -49,6 +49,7 @@ type application struct {
 	session    *sessions.Session
 	Username   string
 	MemberID   int
+	LoginID    int
 }
 
 func main() {
@@ -110,6 +111,10 @@ func main() {
 	mux.Get("/guard-reports", dynamicMiddleware.ThenFunc(app.guardreports))
 	mux.Get("/view-log", dynamicMiddleware.ThenFunc(app.viewlog))
 	mux.Get("/check-in-out", dynamicMiddleware.ThenFunc(app.checkinout))
+	mux.Get("/my-contact", dynamicMiddleware.ThenFunc(app.viewMyContact))
+	mux.Get("/add-mycontact", dynamicMiddleware.ThenFunc(app.addMyContact))
+	mux.Post("/create-mycontact", dynamicMiddleware.ThenFunc(app.createMyContact))
+	mux.Post("/remove-mycontact", dynamicMiddleware.ThenFunc(app.removeMyContact))
 	mux.Get("/guard-view-report", dynamicMiddleware.ThenFunc(app.view_report))
 	mux.Get("/guard-profile", dynamicMiddleware.ThenFunc(app.guard_profile))
 	mux.Get("/admin-profile", dynamicMiddleware.ThenFunc(app.admin_profile))

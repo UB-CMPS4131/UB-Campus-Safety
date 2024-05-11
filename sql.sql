@@ -2,6 +2,8 @@ DROP TABLE IF EXISTS notification_seen CASCADE;
 DROP TABLE IF EXISTS notice CASCADE;
 DROP TABLE IF EXISTS notification CASCADE;
 DROP TABLE IF EXISTS log CASCADE;
+DROP TABLE IF EXISTS log contact;
+DROP TABLE IF EXISTS log studentcontact;
 DROP TABLE IF EXISTS Report CASCADE;
 DROP TABLE IF EXISTS LOGIN CASCADE;
 DROP TABLE IF EXISTS PersonnelInfoTable CASCADE;
@@ -67,6 +69,14 @@ CREATE TABLE notification (
 
 CREATE TABLE contact (
     contact_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    number text NOT NULL,
+    email text NOT NULL
+);
+
+CREATE TABLE studentcontact (
+    contact_id SERIAL PRIMARY KEY,
+    LoginID INTEGER REFERENCES LOGIN(id)
     name VARCHAR(100) NOT NULL,
     number text NOT NULL,
     email text NOT NULL

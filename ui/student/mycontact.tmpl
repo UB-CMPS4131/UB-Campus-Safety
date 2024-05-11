@@ -69,112 +69,24 @@ tbody tr:nth-child(even) {
 tbody tr:hover {
   background-color: #e9ecef;
 }
-/* Updated CSS for the form section */
-
-.container {
-  margin: 20px auto 80px; /* Adjust spacing from the top navbar and the bottom */
-  max-width: 600px; /* Set maximum width for better readability */
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for depth */
-}
-
-.container form {
+.custom-button-container {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
 }
 
-.container form label {
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.container form input[type="text"],
-.container form input[type="file"],
-.container form textarea {
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
-}
-
-.container form input[type="checkbox"] {
-  margin-left: 10px;
-  vertical-align: middle; /* Align checkboxes vertically with the text */
-}
-
-.container form label[for="is-anonymous"], /* Target specific labels */
-.container form label[for="useLocation"] {
-  display: inline-block; /* Make labels inline-block */
-  vertical-align: middle; /* Align labels vertically with the checkboxes */
-  margin-bottom: 0; /* Remove bottom margin */
-}
-
-
-.container form .buttonSubmit {
-  padding: 10px 20px;
-  background-color: #007dc3;
-  color: #fff;
+.custom-button {
+  background-color: #007dc3; /* Green */
   border: none;
-  border-radius: 5px;
+  color: white;
+  padding: 7px 18px;
+  text-decoration: none;
   font-size: 16px;
+  margin: 4px; /* Adjust margin for spacing between buttons */
   cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.container form .buttonSubmit:hover {
-  background-color: #005f8b;
-}
-
-/* Centering the form container */
-.form-container {
-  margin: 0 auto;
-  max-width: 400px; /* Adjust the maximum width as needed */
-  padding: 20px;
-  background-color: #fff;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.form-container h2 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.form-container form {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-container label {
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.form-container input[type="text"],
-.form-container textarea {
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
-}
-
-.form-container input[type="submit"] {
-  padding: 10px 20px;
-  background-color: #007dc3;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.form-container input[type="submit"]:hover {
-  background-color: #005f8b;
+  flex: 1; /* Allow buttons to grow equally within the container */
+  max-width: 200px; /* Limit button width for smaller screens */
 }
 
   </style>
@@ -235,25 +147,48 @@ tbody tr:hover {
     </div>
 
     <section>
-        <div class="form-container">
-           <h2>Add Emergency Contacts</h2>
-           <form action="/create-mycontact" method="POST">
-         
-              <label for="title">Emergency Contact Name:</label><br>
-              <input type="text" id="title" name="name"><br>
-              <label for="title">Phone Number:</label><br>
-              <input type="text" id="title" name="number"><br>
-              <label for="title">Email:</label><br>
-              <input type="text" id="title" name="email"><br>
-                    <!-- Add overlay for loading animation -->
-                    <div class="overlay" id="overlay">
-                     <div class="loading">Submitting...</div>
-                   </div>
-             
-                   <input type="submit" value="Submit" class="buttonSubmit" onclick="showLoading()">
-           </form>
-        </div>
-     </section>
+        <h3>My Emergency Contacts</h3>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Dial</th>
+                    <th>Message</th>
+                    <th>Email</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ if .MyContacts }}
+                {{ range .MyContacts }}
+                <tr>
+                    <td>{{ .Name }}</td>
+                    <td><a href="tel:{{ .Number }}"><span class="icon"><i class='fas fa-phone-alt' style='font-size:20px;color:green'></i></span></a></td>
+                    <td><a href="sms:{{ .Number }}"><span class="icon"><i class='fas fa-comment' style='font-size:20px;color:blue'></i></span></a></td>
+                    <td><a href="mailto:{{ .Email }}"><span class="icon"><i class='fas fa-envelope' style='font-size:20px;color:blue'></i></span></a></td>
+                    <td>
+                        <form action="/remove-mycontact" method="POST">
+                          <input type="hidden" name="contactName" value="{{ .Name }}">
+                          <button type="submit" class="icon-button" style="background-color: transparent; border: none;">
+                            <i style="font-size:20px;color:red" class="fa">&#xf00d;</i>
+                          </button>
+                        </form>
+                      </td>
+                       </tr>
+                {{ end }}
+                {{ else }}
+                <tr>
+                    <td colspan="5">Nothing here to see.</td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
+        <div class="custom-button-container">
+            <input type="button" value="UB Emergency Contacts" onclick="window.location.href='/view-contact'" class="custom-button" />
+            <input type="button" value="Add Contact" onclick="window.location.href='/add-mycontact'" class="custom-button" />
+            </div>
+    </section>
     
 
 <script src="../js/student.js"></script>
@@ -266,7 +201,7 @@ tbody tr:hover {
   
     // Assuming successful submission redirects to /report
     window.onload = function() {
-      if (window.location.href.includes('/my-contact')) {
+      if (window.location.href.includes('/report')) {
         // Hide overlay if redirected to /report
         document.getElementById('overlay').style.display = 'none';
         // Change loading text to "Successful"

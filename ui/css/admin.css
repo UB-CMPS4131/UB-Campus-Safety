@@ -311,7 +311,7 @@ section ul li img {
 }
 
 
-.container form .buttonSubmit {
+.container form input[type="submit"] {
   padding: 10px 20px;
   background-color: #007dc3;
   color: #fff;
@@ -322,7 +322,7 @@ section ul li img {
   transition: background-color 0.3s ease;
 }
 
-.container form .buttonSubmit:hover {
+.container form input[type="submit"]:hover {
   background-color: #005f8b;
 }
 
@@ -360,7 +360,7 @@ section ul li img {
   font-size: 16px;
 }
 
-.form-container button[type="submit"] {
+.form-container input[type="submit"] {
   padding: 10px 20px;
   background-color: #007dc3;
   color: #fff;
@@ -371,7 +371,7 @@ section ul li img {
   transition: background-color 0.3s ease;
 }
 
-.form-container button[type="submit"]:hover {
+.form-container input[type="submit"]:hover {
   background-color: #005f8b;
 }
 

@@ -10,6 +10,7 @@ import (
 
 type templateData struct {
 	Contacts        []*models.Contact
+	MyContacts      []*models.MyContact
 	DATA            []*models.Profile
 	Logs            []*models.Log
 	Notifications   []*models.Notification

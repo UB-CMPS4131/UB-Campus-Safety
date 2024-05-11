@@ -203,9 +203,21 @@ func (m *ConnectModel) InsertNotice(UserID int, Title, Message string) (int, err
 func (m *ConnectModel) InsertContact(name, number, email string) (int, error) {
 	var id int
 	s := `INSERT INTO contact(name, number, email)
-	VALUES ($1, $2, $3) RETURNING contact_id;`
+	VALUES ($1, $2, $3) RETURNING LoginID;`
 
 	err := m.DB.QueryRow(s, name, number, email).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
+func (m *ConnectModel) InsertMyContact(loginid int, name, number, email string) (int, error) {
+	var id int
+	s := `INSERT INTO studentcontact (loginid, name, number, email)
+	VALUES ($1, $2, $3, $4) RETURNING contact_id;`
+
+	err := m.DB.QueryRow(s, loginid, name, number, email).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
@@ -241,6 +253,48 @@ func (m *ConnectModel) ReadLog() ([]*models.Log, error) {
 		return nil, errors.Wrap(err, "error iterating over rows")
 	}
 	return log, nil
+}
+
+func (m *ConnectModel) ReadMyContact(loginID int) ([]*models.MyContact, error) {
+	s := `
+    SELECT name, number, email
+    FROM studentcontact
+	WHERE loginid = $1
+    `
+	rows, err := m.DB.Query(s, loginID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	contacts := []*models.MyContact{}
+
+	for rows.Next() {
+		q := &models.MyContact{}
+		err = rows.Scan(&q.Name, &q.Number, &q.Email)
+		if err != nil {
+			return nil, errors.Wrap(err, "error scanning row")
+		}
+
+		contacts = append(contacts, q)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, errors.Wrap(err, "error iterating over rows")
+	}
+	return contacts, nil
+}
+
+func (m *ConnectModel) RemoveMyContact(loginID int, name string) error {
+	s := `
+    DELETE FROM studentcontact
+    WHERE loginid = $1 AND name = $2
+    `
+	_, err := m.DB.Exec(s, loginID, name)
+	if err != nil {
+		return errors.Wrap(err, "error removing contact")
+	}
+	return nil
 }
 
 func (m *ConnectModel) ReadContact() ([]*models.Contact, error) {

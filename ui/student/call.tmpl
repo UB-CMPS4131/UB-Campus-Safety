@@ -44,6 +44,53 @@
 .notification-item.expanded {
     max-height: none;
 }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+}
+
+thead {
+  background-color: #007bff;
+  color: #fff;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tbody tr:hover {
+  background-color: #e9ecef;
+}
+
+.custom-button-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+}
+
+.custom-button {
+  background-color: #007dc3; /* Green */
+  border: none;
+  color: white;
+  padding: 7px 18px;
+  text-decoration: none;
+  font-size: 16px;
+  margin: 4px; /* Adjust margin for spacing between buttons */
+  cursor: pointer;
+  border-radius: 8px;
+  flex: 1; /* Allow buttons to grow equally within the container */
+  max-width: 200px; /* Limit button width for smaller screens */
+}
+
+
   </style>
 </head>
 <body>
@@ -101,20 +148,40 @@
         </div>
     </div>
 
-<section>
-    <h3> Emergency Contacts</h3>
-    <ul>
-        {{ range .Contacts }} <!-- Ensure .Contacts is the correct field name -->
-        <li>
-            <strong>Name:</strong> {{ .Name }}<br>
-            <strong>Phone Number:</strong> {{ .Number }}<br>
-            <strong>Email:</strong> {{ .Email }}<br>
-        </li>
-        {{ else }}
-        <p>No Emergency contacts available</p>
-        {{ end }}
-    </ul>
-</section>
+    <section>
+        <h3>UB Emergency Contacts</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Dial</th>
+                    <th>Message</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ if .Contacts }}
+                {{ range .Contacts }}
+                <tr>
+                    <td>{{ .Name }}</td>
+                    <td><a href="tel:{{ .Number }}"><span class="icon"><i class='fas fa-phone-alt' style='font-size:20px;color:green'></i></span></a></td>
+                    <td><a href="sms:{{ .Number }}"><span class="icon"><i class='fas fa-comment' style='font-size:20px;color:blue'></i></span></a></td>
+                    <td><a href="mailto:{{ .Email }}"><span class="icon"><i class='fas fa-envelope' style='font-size:20px;color:blue'></i></span></a></td>
+                </tr>
+                {{ end }}
+                {{ else }}
+                <tr>
+                    <td colspan="5">Nothing here to see.</td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
+        <div class="custom-button-container">
+            <input type="button" value="My Emergency Contacts" onclick="window.location.href='/my-contact'" class="custom-button" />
+              </div>
+        
+    </section>
+    
 
 <script src="../js/student.js"></script>
 

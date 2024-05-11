@@ -61,7 +61,7 @@ func (app *application) verification(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, models.ErrInvalidCredentials) {
 			errors_user["default"] = "Email or Password is incorrect"
 			// rerender the login form
-			ts, err := template.ParseFiles("./ui/html/login.page.tmpl")
+			ts, err := template.ParseFiles("./ui/html/login.tmpl")
 			if err != nil {
 				log.Println(err.Error())
 				http.Error(w,
@@ -88,7 +88,7 @@ func (app *application) verification(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	role, memberID, err := app.users.FetchUserRoleAndID(id)
+	LoginID, role, memberID, err := app.users.FetchUserRoleAndID(id)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -110,6 +110,7 @@ func (app *application) verification(w http.ResponseWriter, r *http.Request) {
 	app.PersonName = personName
 	app.Username = username
 	app.MemberID = memberID
+	app.LoginID = LoginID
 	// Redirect to the appropriate route based on role
 	switch role {
 	case 1: // Assuming role 1 is for normal users
@@ -130,7 +131,7 @@ func (app *application) verification(w http.ResponseWriter, r *http.Request) {
 func (app *application) requireAuthentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !app.isAuthenticated(r) {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			http.Redirect(w, r, "/", http.StatusSeeOther)
 			return
 		}
 		w.Header().Add("Cache-Control", "no-store")
@@ -1139,4 +1140,173 @@ func (app *application) createContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/add-contact", http.StatusSeeOther)
+}
+
+func (app *application) addMyContact(w http.ResponseWriter, r *http.Request) {
+
+	ts, err := template.ParseFiles("./ui/student/studentContact.tmpl")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	not, err := app.ubcs.Notification(app.Username)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	err = ts.Execute(w, &templateData{
+		Notifications:   not,
+		IsAuthenticated: app.isAuthenticated(r),
+	})
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+	}
+}
+func (app *application) viewMyContact(w http.ResponseWriter, r *http.Request) {
+	// Get the login ID from the session or request, assuming app.Username holds the login ID.
+	loginID := app.LoginID
+
+	// Fetch the contact based on the login ID.
+	q, err := app.ubcs.ReadMyContact(loginID)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+
+	// Fetch notifications based on the login ID.
+	not, err := app.ubcs.Notification(app.Username)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+
+	// Parse the template file.
+	ts, err := template.ParseFiles("./ui/student/mycontact.tmpl")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+
+	// Execute the template with the fetched data.
+	err = ts.Execute(w, &templateData{
+		MyContacts:      q,
+		Notifications:   not,
+		IsAuthenticated: app.isAuthenticated(r),
+	})
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+}
+
+func (app *application) createMyContact(w http.ResponseWriter, r *http.Request) {
+
+	name := r.FormValue("name")
+	pnumber := r.FormValue("number")
+	email := r.FormValue("email")
+
+	// check the web form fields for validity
+	errors := make(map[string]string)
+	// check each field
+
+	if name = strings.TrimSpace(name); name == "" {
+		errors["name"] = "This field cannot be left blank"
+	} else if len(name) > 75 {
+		errors["name"] = "This field is too long (maximum is 75 characters)"
+	}
+	if pnumber = strings.TrimSpace(pnumber); pnumber == "" {
+		errors["number"] = "This field cannot be left blank"
+	} else if len(pnumber) > 25 {
+		errors["number"] = "This field is too long (maximum is 25 characters)"
+	}
+	if email = strings.TrimSpace(email); email == "" {
+		errors["email"] = "This field cannot be left blank"
+	} else if len(email) > 50 {
+		errors["email"] = "This field is too long (maximum is 50 characters)"
+	}
+	if len(errors) > 0 {
+		ts, err := template.ParseFiles("./ui/student/studentContact.tmpl")
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+
+		}
+		err = ts.Execute(w, &templateData{
+			ErrorsFromForm:  errors,
+			FormData:        r.PostForm,
+			IsAuthenticated: app.isAuthenticated(r),
+		})
+
+		if err != nil {
+			log.Println(err.Error())
+			log.Println(err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+
+		}
+		return
+	}
+
+	// Declare err variable
+	var err error
+	var loginid = app.LoginID
+	// Insert the report
+	_, err = app.ubcs.InsertMyContact(loginid, name, pnumber, email)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, "/my-contact", http.StatusSeeOther)
+}
+
+func (app *application) removeMyContact(w http.ResponseWriter, r *http.Request) {
+	name := r.FormValue("contactName")
+	var contactID = app.LoginID
+
+	// Check the web form fields for validity
+	errors := make(map[string]string)
+
+	if name = strings.TrimSpace(name); name == "" {
+		errors["name"] = "This field cannot be left blank"
+	} else if len(name) > 75 {
+		errors["name"] = "This field is too long (maximum is 75 characters)"
+	}
+
+	if len(errors) > 0 {
+		// Handle errors and return if there are validation issues
+		return
+	}
+
+	// Remove the contact
+	err := app.ubcs.RemoveMyContact(contactID, name)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/my-contact", http.StatusSeeOther)
 }

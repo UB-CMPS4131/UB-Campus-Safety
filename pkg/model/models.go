@@ -73,6 +73,13 @@ type Contact struct {
 	Email  string
 }
 
+type MyContact struct {
+	LoginID int
+	Name    string
+	Number  string
+	Email   string
+}
+
 // type Notification_Seen struct {
 // 	notification_id int
 // 	user_id         int

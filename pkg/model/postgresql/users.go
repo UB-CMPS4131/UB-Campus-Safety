@@ -44,26 +44,27 @@ func (m *UserModel) Authenticate(username, password string) (int, error) {
 	return id, nil
 }
 
-func (m *UserModel) FetchUserRoleAndID(id int) (int, int, error) {
+func (m *UserModel) FetchUserRoleAndID(id int) (int, int, int, error) {
 	// Fetch user credentials from the database
 	var role int
 	var memberID int
+	var LoginID int
 
 	s := `
-		SELECT role, memberID
+		SELECT id, role, memberID
 		FROM LOGIN
 		WHERE id = $1
 		AND activated = TRUE
 	`
-	err := m.DB.QueryRow(s, id).Scan(&role, &memberID)
+	err := m.DB.QueryRow(s, id).Scan(&LoginID, &role, &memberID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return 0, 0, models.ErrInvalidCredentials
+			return 0, 0, 0, models.ErrInvalidCredentials
 		} else {
-			return 0, 0, err
+			return 0, 0, 0, err
 		}
 	}
-	return role, memberID, nil
+	return LoginID, role, memberID, nil
 }
 func (m *UserModel) Get(id int) (*models.User, error) {
 	return nil, nil
