@@ -39,6 +39,108 @@ background: #f5f5f5;
     z-index: 9999;
   }
   
+  .fa.fa-panic:before {
+    content: "\26A0"; /* Unicode for warning sign */
+    color: red; /* Or any color you want */
+    font-size: 24px; /* Adjust size as needed */
+}
+
+.fas.fa-file-upload {
+  color: green; /* Or any color you want */
+  font-size: 24px; /* Adjust size as needed */
+}
+.fas.fa-address-book{
+  color: orange; /* Or any color you want */
+  font-size: 24px; /* Adjust size as needed */
+}
+
+.fa.fa-user {
+  color: yellow; /* Or any color you want */
+  font-size: 24px; /* Adjust size as needed */
+}
+.fa.fa-arrow-left {
+  color: palevioletred; /* Or any color you want */
+  font-size: 24px; /* Adjust size as needed */
+}
+
+
+
+
+#notification_icon{
+  color: white;
+  font-weight: 100;
+}
+
+.notification-item {
+  cursor: pointer;
+  overflow: hidden;
+  max-height: 3.6em; /* Approximately two lines of text */
+  transition: max-height 0.5s ease;
+}
+.notification-item.expanded {
+  max-height: none;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+}
+
+thead {
+  background-color: #007bff;
+  color: #fff;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tbody tr:hover {
+  background-color: #e9ecef;
+}
+
+.custom-button-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+}
+
+.custom-button {
+  background-color: #007dc3; /* Green */
+  border: none;
+  color: white;
+  padding: 7px 18px;
+  text-decoration: none;
+  font-size: 16px;
+  margin: 4px; /* Adjust margin for spacing between buttons */
+  cursor: pointer;
+  border-radius: 8px;
+  flex: 1; /* Allow buttons to grow equally within the container */
+  max-width: 200px; /* Limit button width for smaller screens */
+}
+
+
+#locationchoice {
+  width: 100%;
+  padding: 4px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+#locationchoice option {
+  padding: 6px;
+}
 
 .top_navbar{
 position: fixed;

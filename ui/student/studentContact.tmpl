@@ -30,45 +30,7 @@
       color: white;
       font-size: 24px;
     }
-    #notification_icon{
-    color: white;
-    font-weight: 100;
-}
 
-.notification-item {
-    cursor: pointer;
-    overflow: hidden;
-    max-height: 3.6em; /* Approximately two lines of text */
-    transition: max-height 0.5s ease;
-}
-.notification-item.expanded {
-    max-height: none;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-th, td {
-  padding: 10px;
-  text-align: left;
-}
-
-thead {
-  background-color: #007bff;
-  color: #fff;
-}
-
-tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-tbody tr:hover {
-  background-color: #e9ecef;
-}
 /* Updated CSS for the form section */
 
 .container {
@@ -177,6 +139,8 @@ tbody tr:hover {
   background-color: #005f8b;
 }
 
+
+
   </style>
 </head>
 <body>
@@ -205,6 +169,12 @@ tbody tr:hover {
         <div class="sidebar">
             <div class="sidebar_inner">
                 <ul>
+                    <li>
+                      <a href="/panic">
+                        <span class="icon"><i class="fa fa-panic"></i></span>
+                        <span class="text">Panic</span>
+                      </a>
+                    </li>
                     <li>
                         <a href="/reports">
                             <span class="icon"><i class="fas fa-file-upload"></i></span>

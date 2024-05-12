@@ -52,7 +52,7 @@ func (app *application) routes() http.Handler {
 	mux.Get("/view-contact", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.viewContact))
 	mux.Get("/guard-reports", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.guardreports))
 	mux.Get("/view-log", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.viewlog))
-	mux.Get("/check-in-out", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.checkinout))
+	mux.Get("/check-in-out", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.workLog))
 	mux.Get("/my-contact", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.viewMyContact))
 	mux.Get("/add-mycontact", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.addMyContact))
 	mux.Post("/create-mycontact", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.createMyContact))

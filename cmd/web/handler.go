@@ -201,7 +201,7 @@ func (app *application) addContact(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) student(w http.ResponseWriter, r *http.Request) {
 
-	ts, err := template.ParseFiles("./ui/student/reports.tmpl")
+	ts, err := template.ParseFiles("./ui/student/panic.tmpl")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -228,7 +228,7 @@ func (app *application) student(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) guard(w http.ResponseWriter, r *http.Request) {
 
-	ts, err := template.ParseFiles("./ui/guard/checkinout.tmpl")
+	ts, err := template.ParseFiles("./ui/guard/workLog.tmpl")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -385,7 +385,15 @@ func (app *application) panic(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	err = ts.Execute(w, nil)
+	not, err := app.ubcs.Notification(app.Username)
+	if err != nil {
+		log.Println("ERROR:", err.Error())
+	}
+
+	err = ts.Execute(w, &templateData{
+		Notifications:   not,
+		IsAuthenticated: app.isAuthenticated(r),
+	})
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -728,8 +736,8 @@ func (app *application) viewlog(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *application) checkinout(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("./ui/guard/checkinout.tmpl")
+func (app *application) workLog(w http.ResponseWriter, r *http.Request) {
+	ts, err := template.ParseFiles("./ui/guard/workLog.tmpl")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -978,7 +986,7 @@ func (app *application) createLog(w http.ResponseWriter, r *http.Request) {
 	}
 	// check if there are any errors in the map
 	if len(errors) > 0 {
-		ts, err := template.ParseFiles("./ui/guard/checkinout.tmpl")
+		ts, err := template.ParseFiles("./ui/guard/workLog.tmpl")
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
