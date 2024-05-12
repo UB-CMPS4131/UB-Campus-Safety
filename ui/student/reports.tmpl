@@ -46,6 +46,19 @@
 .notification-item.expanded {
     max-height: none;
 }
+#locationchoice {
+  width: 100%;
+  padding: 4px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+#locationchoice option {
+  padding: 6px;
+}
   </style>
 </head>
 <body>
@@ -124,7 +137,24 @@
       </datalist><br><br>
       
       <label for="location">Location:</label><br>
-      <input type="text" id="location" name="location" required><br><br>
+      <input type="hidden" id="location" name="location" required>
+      <select id="locationchoice">
+        <option value="" selected disabled>Select a location</option>
+        <option value="17.244782109951572, -88.76003692342708">Jaguar Building</option>
+        <option value="17.243779927424914, -88.75985852969787">Iguana Building</option>
+        <option value="17.243609914132474, -88.75983486912153">Kinkajou Building</option>
+        <option value="17.24319591229174, -88.7596762885771">Scarlet Macaw Building</option>
+        <option value="17.242665501029737, -88.75952771381773">Jabiru building</option>
+        <option value="17.242417910418347, -88.7601218503104">Manatee Building</option>
+        <option value="17.244339469513168, -88.75944161313633">Education & Arts Building</option>
+        <option value="17.242007763795556, -88.76014410214768">Hummingbird Building</option>
+        <option value="17.2450771238675, -88.76168054195143">Regional Language Center</option>
+        <option value="17.243938246309032, -88.76219438793626">Library Building</option>
+        <option value="17.243552072339043, -88.76181786911745">Central Medical Laboratory</option>
+        <option value="17.241783738915952, -88.75978716247677">Engineering Department</option>
+        <option value="17.240557933696326, -88.7587762062404">Gymnasium</option>
+        <option value="17.240677039334418, -88.75932814410466">Student Dormitory</option>
+      </select>
       
       <label for="useLocation">Use Device Location <input type="checkbox" id="useLocation" name="device_location" onchange="getLocation()"></label><br><br>
       
@@ -160,6 +190,19 @@
       document.querySelector('.loading').innerText = 'Successful';
     }
   };
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get the dropdown and input elements
+    var locationDropdown = document.getElementById('locationchoice');
+    var locationInput = document.getElementById('location');
+
+    // Add event listener to the dropdown
+    locationDropdown.addEventListener('change', function() {
+      // Update the input field's value with the selected option's value
+      locationInput.value = locationDropdown.value;
+    });
+  });
+
 
   var notificationIcon = document.getElementById('notification_icon');
         var notificationWindow = document.getElementById('notification_window');

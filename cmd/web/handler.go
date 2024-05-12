@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"errors"
 	"io"
 	"strings"
@@ -15,71 +14,98 @@ import (
 )
 
 func (app *application) login(w http.ResponseWriter, r *http.Request) {
+	// Check if the user is already authenticated
+	if app.isAuthenticated(r) {
+		// Get the authenticated user ID
+		userID := app.session.GetInt(r, "authenticatedUserID")
+		if userID == 0 {
+			// Invalid user ID, redirect to login
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
 
+		// Fetch user role, ID, and username
+		username, loginID, role, memberID, err := app.users.FetchUserRoleAndIDAndUsername(userID)
+		if err != nil {
+			log.Println("ERROR: ", err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		personName, err := app.users.FetchUserPersonName(memberID)
+		if err != nil {
+			log.Println("ERROR: ", err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		// Set user information in the application struct
+		app.Username = username
+		app.PersonName = personName
+		app.MemberID = memberID
+		app.LoginID = loginID
+
+		// Redirect to the appropriate route based on role
+		switch role {
+		case 1: // Assuming role 1 is for normal users
+			http.Redirect(w, r, "/add-notice", http.StatusSeeOther)
+		case 2: // Assuming role 2 is for admin users
+			http.Redirect(w, r, "/student", http.StatusSeeOther)
+		case 3: // Assuming role 3 is for guard users
+			http.Redirect(w, r, "/guard", http.StatusSeeOther)
+		default:
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+		}
+		return
+	}
+
+	// User is not authenticated, render the login form
 	data := &templateData{
-
-		IsAuthenticated: app.isAuthenticated(r),
+		IsAuthenticated: false, // Set IsAuthenticated to false for the login form
 	}
 
 	ts, err := template.ParseFiles("./ui/html/login.tmpl")
-
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w,
-			http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
+		app.serverError(w, err)
 		return
 	}
 	err = ts.Execute(w, data)
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w,
-			http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
+		app.serverError(w, err)
+		return
 	}
-}
-
-func (app *application) isAuthenticated(r *http.Request) bool {
-	return app.session.Exists(r, "authenticatedUserID")
 }
 
 func (app *application) verification(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w,
-			http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
+		app.clientError(w, http.StatusBadRequest)
 		return
 	}
 	username := r.PostForm.Get("username")
 	password := r.PostForm.Get("password")
 	// check the web form fields to validity
-	errors_user := make(map[string]string)
+	errorsUser := make(map[string]string)
 	id, err := app.users.Authenticate(username, password)
 	if err != nil {
 		if errors.Is(err, models.ErrInvalidCredentials) {
-			errors_user["default"] = "Email or Password is incorrect"
+			errorsUser["default"] = "Email or Password is incorrect"
 			// rerender the login form
 			ts, err := template.ParseFiles("./ui/html/login.tmpl")
 			if err != nil {
-				log.Println(err.Error())
-				http.Error(w,
-					http.StatusText(http.StatusInternalServerError),
-					http.StatusInternalServerError)
+				log.Println("ERROR: ", err.Error())
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 				return
 			}
 			err = ts.Execute(w, &templateData{
-				ErrorsFromForm:  errors_user,
+				ErrorsFromForm:  errorsUser,
 				FormData:        r.PostForm,
 				IsAuthenticated: app.isAuthenticated(r),
 			})
 
 			if err != nil {
-				log.Println(err.Error())
-				http.Error(w,
-					http.StatusText(http.StatusInternalServerError),
-					http.StatusInternalServerError)
+				log.Println("ERROR: ", err.Error())
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 				return
 			}
 			return
@@ -88,29 +114,24 @@ func (app *application) verification(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	LoginID, role, memberID, err := app.users.FetchUserRoleAndID(id)
+	loginID, role, memberID, err := app.users.FetchUserRoleAndID(id)
 	if err != nil {
-		log.Println(err.Error())
+		log.Println("ERROR: ", err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	// Fetch first name and last name from PersonnelInfoTable based on memberID
-	var personName string
-	row := app.ubcs.DB.QueryRow("SELECT CONCAT(FName, ' ', LName) FROM PersonnelInfoTable WHERE id = $1 LIMIT 1", memberID)
-	err = row.Scan(&personName)
-	if err == sql.ErrNoRows {
-		renderTemplate(w, "./ui/html/login.tmpl", err)
-		log.Println(err.Error())
+	personName, err := app.users.FetchUserPersonName(memberID)
+	if err != nil {
+		log.Println("ERROR: ", err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
-
 	}
 
 	// Set PersonName in the application struct
 	app.PersonName = personName
 	app.Username = username
 	app.MemberID = memberID
-	app.LoginID = LoginID
+	app.LoginID = loginID
 	// Redirect to the appropriate route based on role
 	switch role {
 	case 1: // Assuming role 1 is for normal users
@@ -128,40 +149,10 @@ func (app *application) verification(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *application) requireAuthentication(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !app.isAuthenticated(r) {
-			http.Redirect(w, r, "/", http.StatusSeeOther)
-			return
-		}
-		w.Header().Add("Cache-Control", "no-store")
-		next.ServeHTTP(w, r)
-	})
-}
-
 func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
 	app.session.Remove(r, "authenticatedUserID")
 	app.session.Put(r, "flash", "You have been logged out successfully")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
-}
-
-func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
-	ts, err := template.ParseFiles(tmpl)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w,
-			http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-		return
-	}
-
-	err = ts.Execute(w, data)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w,
-			http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-	}
 }
 
 func (app *application) addNotices(w http.ResponseWriter, r *http.Request) {

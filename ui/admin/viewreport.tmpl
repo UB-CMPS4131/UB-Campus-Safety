@@ -74,8 +74,8 @@
         <li>
             <strong>Person Name:</strong> {{ .PersonName }}<br>
             <strong>Type of Incident:</strong> {{ .TypeOfIncident }}<br>
-            <strong>Location:</strong> <a href="https://www.google.com/maps/search/?api=1&query={{ .Location }}" target="_blank">{{ .Location }}</a><br>
-            <strong>Description:</strong> {{ .Description }}<br>
+            <strong>Location:</strong> <a href="#" class="map-link" data-location="{{ .Location }}">{{ .Location }}</a><br>
+           <strong>Description:</strong> {{ .Description }}<br>
             {{ if .EncodedImageData }}
                 <!-- Dynamically determine the MIME type -->
                 {{ $mimeType := .MimeType }}
@@ -92,17 +92,29 @@
     </div>
     </ul>
 </section>
-
 <!-- The modal -->
 <div id="imageModal" class="modal">
   <span class="close">&times;</span>
   <img class="modal-content" id="modalImage">
 </div>
+
+<div id="mapModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="mapContainer" class="modal-body">
+            <iframe id="mapFrame" width="750" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+    </div>
+</div>
+ 
+
 <script src="../js/admin.js"></script>
 <script>
     // Get the modal
     var modal = document.getElementById("imageModal");
-  
+    var mapModal = document.getElementById("mapModal");
+    var mapFrame = document.getElementById("mapFrame");
+
     // Get the image and insert it inside the modal
     var images = document.querySelectorAll('.report-image');
     var modalImg = document.getElementById("modalImage");
@@ -112,17 +124,35 @@
         modalImg.src = this.src;
       });
     });
+
+    // Get all map links
+    var mapLinks = document.querySelectorAll('.map-link');
+    mapLinks.forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        var location = this.getAttribute('data-location');
+        var mapUrl = 'https://www.google.com/maps?q=' + encodeURIComponent(location) + "&hl=es;z14&output=embed";
+          mapFrame.src = mapUrl;
+        mapModal.style.display = "block";
+      });
+    });
   
     // Close the modal when the user clicks on the close button
-    var span = document.getElementsByClassName("close")[0];
-    span.onclick = function() {
-      modal.style.display = "none";
-    };
+    var span = document.querySelectorAll(".close");
+    span.forEach(function(closeButton) {
+      closeButton.onclick = function() {
+        modal.style.display = "none";
+        mapModal.style.display = "none";
+        mapFrame.src = "";
+      };
+    });
   
     // Close the modal when the user clicks anywhere outside the modal
     window.onclick = function(event) {
-      if (event.target == modal) {
-        modal.style.display = "none";
+      if (event.target == modal || event.target == mapModal) {
+        modal.style.display = "none"; 
+        mapModal.style.display = "none";
+        mapFrame.src = "";
       }
     };
 
@@ -131,7 +161,8 @@
     for (var i = reports.length - 1; i >= 0; i--) {
       notificationContainer.appendChild(reports[i]);
     }
-  </script>
+</script>
+
 </body>
 </html>
 
