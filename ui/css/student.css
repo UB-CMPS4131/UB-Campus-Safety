@@ -413,6 +413,9 @@ color: #fff;
     .container {
         margin-top: 30px;
     } 
+    warning:after {
+      margin-top: 25%;
+    }
 }
 
 section {
@@ -487,27 +490,55 @@ section {
     z-index: 1;
     transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg)
     rotate3d(1, 0, 0, 40deg);
-    margin-top: -4.5vmin;
+    margin-top: -.5vmin;
     height: 22vmin;
     }
 
 
-  button#activate {
-    background: #d60505;
-    border: 0;
-    width: 20vmin;
-    height: 19vmin;
-    border-radius: 100%;
-    position: relative;
-    cursor: pointer;
-    outline: none;
-    z-index: 2;
-    box-shadow: 0 4vmin 0.15vmin 0vmin #af0000,
-      0 2vmin 0.15vmin 0vmin #af0000;
-    top: -2.5vmin;
-    border: 0.5vmin solid #af0000a1;
-    transition: all 0.25s ease 0s;
-  }
+    button#activate {
+      background: #d60505;
+      border: 0;
+      width: 16vmin;
+      height: 19vmin;
+      border-radius: 100%;
+      position: relative;
+      margin-bottom: 15px;
+      cursor: pointer;
+      outline: none;
+      z-index: 2;
+      box-shadow: 0 4vmin 0.15vmin 0vmin #af0000,
+        0 2vmin 0.15vmin 0vmin #af0000;
+      top: -2.5vmin;
+      border: 0.5vmin solid #af0000a1;
+      transition: all 0.25s ease 0s;
+    }
+    
+    .TinButton {
+      color: white;
+      font-size: 3vmin; /* Start with a reasonable font size */
+      text-align: center;
+      line-height: 1.2;
+      margin: 0;
+      padding: 0;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      white-space: nowrap;
+    }
+    
+    @media screen and (max-width: 768px) {
+      .TinButton {
+        font-size: 2vmin; /* Adjust font size for smaller screens */
+      }
+    }
+    
+    @media screen and (max-width: 480px) {
+      .TinButton {
+        font-size: 2.6vmin; /* Further adjust font size for even smaller screens */
+      }
+    }
+    
 
   button#activate:hover {
     box-shadow: 0 3vmin 0.15vmin 0vmin #af0000,
@@ -615,22 +646,23 @@ section {
   }
 
   .warning:after {
-    content: "WARNING:\2009 PANIC";
+    content: "WARNING:\2009 PANIC BUTTON";
     color: white;
-    transform: rotate(90deg);
-    float: left;
     background: #af0000;
     position: absolute;
-    bottom: 17.5vmin;
-    left: -30vmin;
+    top: calc(-38vmin - 3vmin); /* Adjust this value as needed */
+    left: 50%;
+    transform: translateX(-50%);
     font-size: 5vmin;
     font-family: Arial, Helvetica, serif;
-    width: 49vmin;
+    width: 46vmin;
     text-align: center;
     padding: 1vmin;
     text-shadow: 0 0 1px #000, 0 0 1px #000, 0 0 1px #000;
-    height: 8vmin;
-    
+    height: 12vmin;
+    border-radius: 5px;
+    font-weight: bolder;
+    margin-top: 45%;
   }
 
 
@@ -751,40 +783,9 @@ section {
     }
   }
 
-  div#turn-off {
-    position: fixed;
-    background: #ffffff80;
-    left: 0;
-    width: 100vw;
-    height: 0vh;
-    z-index: 7;
-  }
 
-  div#turn-off:before,
-  div#turn-off:after {
-    content: "";
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 0vh;
-    background: #000;
-    width: 100vw;
-    transition: height 0.5s ease 0s;
-  }
-  div#turn-off:after {
-    top: inherit;
-    bottom: 0;
-  }
 
-  div#turn-off.close {
-    height: 100vh;
-  }
 
-  div#turn-off.close:before,
-  div#turn-off.close:after {
-    transition: height 0.1s ease 0.1s;
-    height: 49.75vh;
-  }
 
   #time.crono {
     background: #ffffffba;
