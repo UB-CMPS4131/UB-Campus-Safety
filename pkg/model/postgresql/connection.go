@@ -371,3 +371,33 @@ func (m *ConnectModel) InsertEmergency(name, location, message string) (int, err
 	}
 	return id, nil
 }
+
+func (m *ConnectModel) ReadMapLocation() ([]*models.Map, error) {
+	// SQL statement to fetch profile for the logged-in user based on their member ID
+	s := `
+    SELECT emergency_id, person_name, location, message
+    FROM emergency
+    `
+	rows, err := m.DB.Query(s)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	mapLocation := []*models.Map{}
+
+	for rows.Next() {
+		q := &models.Map{}
+		err = rows.Scan(&q.EmergencyID, &q.PersonName, &q.Location, &q.Message)
+		if err != nil {
+			return nil, errors.Wrap(err, "error Scanning row")
+		}
+
+		mapLocation = append(mapLocation, q)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, errors.Wrap(err, "error iterating over rows")
+	}
+	return mapLocation, nil
+}

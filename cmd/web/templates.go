@@ -14,6 +14,7 @@ type templateData struct {
 	DATA            []*models.Profile
 	Logs            []*models.Log
 	Notifications   []*models.Notification
+	Locations       []*models.Map
 	Reports         []*models.Report
 	ErrorsFromForm  map[string]string
 	Flash           string

@@ -1379,3 +1379,57 @@ func (app *application) submitEmergency(w http.ResponseWriter, r *http.Request) 
 
 	http.Redirect(w, r, "/student", http.StatusSeeOther)
 }
+
+func (app *application) guardMap(w http.ResponseWriter, r *http.Request) {
+	ts, err := template.ParseFiles("./ui/guard/map.tmpl")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	err = ts.Execute(w, &templateData{
+		IsAuthenticated: app.isAuthenticated(r),
+	})
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+	}
+}
+
+func (app *application) viewMapLocation(w http.ResponseWriter, r *http.Request) {
+
+	q, err := app.ubcs.ReadMapLocation()
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	// Display the quotes using a template
+	ts, err := template.ParseFiles("./ui/guard/map.tmpl")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+
+	err = ts.Execute(w, &templateData{
+		Locations:       q,
+		IsAuthenticated: app.isAuthenticated(r),
+	})
+
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+}
