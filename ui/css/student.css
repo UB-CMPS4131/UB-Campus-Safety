@@ -423,6 +423,11 @@ section {
     margin-left: 80px; /* Adjust spacing from the sidebar */
     padding: 20px;
   }
+
+/* Default styling for section.body */
+/* Default styling for section.body */
+/* Default styling for section.body */
+  
   
   section h3 {
     font-size: 24px;
@@ -469,16 +474,30 @@ section {
   }
 
 
-  .body {
-    margin: 0;
-    padding: 0;
-    width: 100vw;
-    height: 100vh;
+ .body {
+    margin-top: 280px; /* Adjust spacing from the top navbar */
+    margin-left: 80px; /* Adjust spacing from the sidebar */
+    padding: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
   }
+
+
+/* Media query for phone screens */
+@media only screen and (max-width: 768px) {
+  .body {
+    
+    margin: 210px; /* Adjust margin for smaller screens */
+    padding: 10px; /* Adjust padding for smaller screens */
+    margin-left: auto; /* Center the section horizontally */
+    margin-right: auto; /* Center the section horizontally */
+    padding: 20px;
+    max-width: 600px; /* Set maximum width for better readability */
+  }
+}
+
 
   .base {
     background: #cacaca;
@@ -723,12 +742,13 @@ section {
     position: absolute;
     background: #ff0000d0;
     color: #ffffff;
-    font-family: Arial, Helvetica, serif;
+    font-family: Arial, Helvetica, sans-serif; /* Updated font stack */
     width: 90vmin;
     box-sizing: border-box;
     font-size: 3.25vmin;
     padding: 1vmin 2vmin;
     height: 60vmin;
+    margin-bottom: 70px;
     box-shadow: 0 0 0 100vmin #ff000060, 0 0 0 5vmin #ff000060;
     z-index: 5;
     display: none;
@@ -736,6 +756,19 @@ section {
     text-shadow: 0 0 1px #fff, 0 0 3px #fff, 0 0 5px #fff;
     animation: warning-ligth 1s 0s infinite;
   }
+  
+  /* Media query for phone screens */
+  @media only screen and (max-width: 600px) {
+    #panel {
+      width: 80vw; /* Adjust width for smaller screens */
+      font-size: 4.5vmin; /* Adjust font size for smaller screens */
+      padding: 2vmin 3vmin; /* Adjust padding for smaller screens */
+      height: 50vmin; /* Adjust height for smaller screens */
+      margin-bottom: 40px; /* Adjust margin for smaller screens */
+      box-shadow: 0 0 0 80vw #ff000060, 0 0 0 3vmin #ff000060; /* Adjust box-shadow for smaller screens */
+    }
+  }
+  
   #panel.show {
     display: block !important;
   }
@@ -782,10 +815,6 @@ section {
       box-shadow: 0 0 15px 5px #fff;
     }
   }
-
-
-
-
 
   #time.crono {
     background: #ffffffba;
