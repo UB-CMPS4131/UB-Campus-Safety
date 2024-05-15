@@ -104,7 +104,7 @@
         </div>
     </div>
 
-<section2 translate="no" class="body">
+<section translate="no" class="body">
     <div class="grid"></div>
 
     <div class="warning"></div>
@@ -135,94 +135,128 @@
       <span id="detonate">SENT</span>
     </div>
 
+    <form id="emergencyForm" style="display: none;">
+      <label for="location">Location:</label>
+      <input type="text" id="location" name="location" required><br>
+  
+      <label for="message">Message:</label>
+      <input type="text" id="message" name="message" required><br>
+  
+      <button type="submit">Submit</button>
+    </form>
+
+
+
+
     <div id="restart"><button id="reload"></button></div>
 
-    <audio id="alarm">
-      <source src="" type="audio/mpeg" />
-    </audio>
-</section2>
+  
+
+</section>
 <script id="rendered-js">
-      var theCount;
-      var alarm = document.getElementById("alarm");
-      var panel = document.getElementById("panel");
+  var theCount;
+ 
+  var panel = document.getElementById("panel");
+  var detonate = document.getElementById("detonate");
+  var time = document.getElementById("time");
+  var cover = document.getElementById("cover");
+  var btn = document.getElementById("activate");
+  var abort = document.getElementById("abort");
+  var reload = document.getElementById("restart");
+  var emergencyForm = document.getElementById("emergencyForm");
+  var messageInput = document.getElementById("message");
 
-      var detonate = document.getElementById("detonate");
-      alarm.volume = 0.25; //volume level
 
-      var time = document.getElementById("time");
-      function showCountDown() {
-        time.innerText = time.innerText - 1;
-        if (time.innerText == 0) {
-          clearInterval(theCount);
-          time.classList.add("crono");
-          abort.classList.add("hide");
-          detonate.classList.add("show");
-          setTimeout(function () {
+  function showCountDown() {
+  var time = document.getElementById("time");
+  time.innerText = parseInt(time.innerText) - 1;
+  if (time.innerText == 0) {
+    clearInterval(theCount);
+    time.classList.add("crono");
+    abort.classList.add("hide");
+    detonate.classList.add("show");
 
-            reload.classList.add("show");
-            alarm.pause();
-          }, 1500);
-        }
-      }
+    // Automatically submit the form using AJAX
+    var emergencyForm = document.getElementById("emergencyForm");
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        var latitude = position.coords.latitude;
+        var longitude = position.coords.longitude;
 
-      var cover = document.getElementById("cover");
-      cover.addEventListener("click", function () {
-        if (this.className == "box") this.classList.add("opened");
-        else this.classList.remove("opened");
-      });
+        var formData = new FormData(emergencyForm);
+       formData.set("location", JSON.stringify({ latitude, longitude }));
 
-      var btn = document.getElementById("activate");
-      activate.addEventListener("click", function () {
-        this.classList.add("pushed");
-        alarm.load();
-        alarm.currentTime = 10.1;
-        alarm.play();
+        formData.set("message", "Urgent! utmost importance Student in Danger"); // Set the message
+        fetch("/submitEmergency", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data); // Handle the response as needed
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+
+        // Reload the page after form submission
         setTimeout(function () {
-          panel.classList.add("show");
-          theCount = setInterval(showCountDown, 1000);
-          alarm.load();
-          alarm.play();
-        }, 500);
+          location.reload();
+        }, 500); // Adjust the time delay as needed
+      }, (error) => {
+        console.error("Error getting location:", error);
+        // Handle error fetching location
       });
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
+  }
+}
 
-      var abort = document.getElementById("abort");
-      abort.addEventListener("click", function () {
-        btn.classList.remove("pushed");
-        panel.classList.remove("show");
-        clearInterval(theCount);
-        time.innerText = 9;
-        alarm.pause();
-        alarm.currentTime = 10;
-        alarm.play();
-      });
 
-      var reload = document.getElementById("restart");
-      reload.addEventListener("click", function () {
-        panel.classList.remove("show");
-        abort.classList.remove("hide");
-        detonate.classList.remove("show");
-        cover.classList.remove("opened");
-        btn.classList.remove("pushed");
-        this.classList.remove("show");
-        time.classList.remove("crono");
-        time.innerText = 9;
-      });
 
-      setTimeout(function () {
-        cover.classList.remove("opened");
-      }, 100);
 
-      var mute = document.getElementById("mute");
-      mute.addEventListener("click", function () {
-        if (this.className == "muted") {
-          alarm.muted = false;
-          this.classList.remove("muted");
-        } else {
-          alarm.muted = true;
-          this.classList.add("muted");
-        }
-      });
-    </script>
+
+  cover.addEventListener("click", function () {
+    if (this.className == "box") this.classList.add("opened");
+    else this.classList.remove("opened");
+  });
+
+  btn.addEventListener("click", function () {
+    this.classList.add("pushed");
+
+    setTimeout(function () {
+      panel.classList.add("show");
+      theCount = setInterval(showCountDown, 1000);
+  
+    }, 500);
+  });
+
+  abort.addEventListener("click", function () {
+    btn.classList.remove("pushed");
+    panel.classList.remove("show");
+    clearInterval(theCount);
+    time.innerText = 5;
+  
+  });
+
+  reload.addEventListener("click", function () {
+    panel.classList.remove("show");
+    abort.classList.remove("hide");
+    detonate.classList.remove("show");
+    cover.classList.remove("opened");
+    btn.classList.remove("pushed");
+    this.classList.remove("show");
+    time.classList.remove("crono");
+    time.innerText = 5;
+  });
+
+  setTimeout(function () {
+    cover.classList.remove("opened");
+  }, 100);
+
+</script>
+
 
 <script src="../js/student.js"></script>
 

@@ -74,6 +74,13 @@ CREATE TABLE contact (
     email text NOT NULL
 );
 
+CREATE TABLE emergency (
+    emergency_id SERIAL PRIMARY KEY,
+    person_name VARCHAR(150),
+    location text NOT NULL,
+    message text NOT NULL
+);
+
 CREATE TABLE studentcontact (
     contact_id SERIAL PRIMARY KEY,
     LoginID INTEGER REFERENCES LOGIN(id)

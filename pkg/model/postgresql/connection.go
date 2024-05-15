@@ -359,3 +359,15 @@ func (m *ConnectModel) Notification(username string) ([]*models.Notification, er
 
 	return notifications, nil
 }
+
+func (m *ConnectModel) InsertEmergency(name, location, message string) (int, error) {
+	var id int
+	s := `INSERT INTO emergency (person_name, location, message)
+	VALUES ($1, $2, $3) RETURNING emergency_id;`
+
+	err := m.DB.QueryRow(s, name, location, message).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}

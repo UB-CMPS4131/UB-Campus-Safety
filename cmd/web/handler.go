@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"strings"
 	"time"
@@ -1308,4 +1310,72 @@ func (app *application) removeMyContact(w http.ResponseWriter, r *http.Request) 
 	}
 
 	http.Redirect(w, r, "/my-contact", http.StatusSeeOther)
+}
+
+func (app *application) submitEmergency(w http.ResponseWriter, r *http.Request) {
+	name := app.PersonName
+	locationJSON := r.FormValue("location")
+	message := r.FormValue("message")
+
+	// Check the web form fields for validity
+	errors := make(map[string]string)
+
+	if locationJSON == "" {
+		errors["location"] = "Location data is required"
+	} else {
+		var locationData map[string]float64
+		err := json.Unmarshal([]byte(locationJSON), &locationData)
+		if err != nil {
+			errors["location"] = "Invalid location data format"
+		} else {
+			latitude, ok := locationData["latitude"]
+			if !ok || latitude < -90.0 || latitude > 90.0 {
+				errors["location"] = "Latitude is out of range"
+			}
+			longitude, ok := locationData["longitude"]
+			if !ok || longitude < -180.0 || longitude > 180.0 {
+				errors["location"] = "Longitude is out of range"
+			}
+			// Update locationJSON to only contain coordinates without brackets
+			locationJSON = fmt.Sprintf("%f,%f", latitude, longitude)
+		}
+	}
+
+	if message == "" {
+		errors["message"] = "This field cannot be left blank"
+	} else if len(message) > 120 {
+		errors["message"] = "This field is too long (maximum is 120 characters)"
+	}
+
+	if len(errors) > 0 {
+		ts, err := template.ParseFiles("./ui/student/panic.tmpl")
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		err = ts.Execute(w, &templateData{
+			ErrorsFromForm:  errors,
+			FormData:        r.PostForm,
+			IsAuthenticated: app.isAuthenticated(r),
+		})
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		return
+	}
+
+	// Insert the report
+	id, err := app.ubcs.InsertEmergency(name, locationJSON, message)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	// Use id if needed, for example, log it
+	log.Printf("Emergency report inserted with ID: %d\n", id)
+
+	http.Redirect(w, r, "/student", http.StatusSeeOther)
 }

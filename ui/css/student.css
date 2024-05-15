@@ -488,13 +488,13 @@ section {
 /* Media query for phone screens */
 @media only screen and (max-width: 768px) {
   .body {
-    
     margin: 210px; /* Adjust margin for smaller screens */
     padding: 10px; /* Adjust padding for smaller screens */
     margin-left: auto; /* Center the section horizontally */
     margin-right: auto; /* Center the section horizontally */
     padding: 20px;
     max-width: 600px; /* Set maximum width for better readability */
+    
   }
 }
 
