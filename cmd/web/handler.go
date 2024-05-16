@@ -1433,3 +1433,37 @@ func (app *application) viewMapLocation(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 }
+
+func (app *application) viewADMINMapLocation(w http.ResponseWriter, r *http.Request) {
+
+	q, err := app.ubcs.ReadMapLocation()
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+	// Display the quotes using a template
+	ts, err := template.ParseFiles("./static/admin/admin-map.html")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+
+	err = ts.Execute(w, &templateData{
+		Locations:       q,
+		IsAuthenticated: app.isAuthenticated(r),
+	})
+
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w,
+			http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+}

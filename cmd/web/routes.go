@@ -43,6 +43,7 @@ func (app *application) routes() http.Handler {
 	mux.Get("/guard-view-report", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.view_report))
 	mux.Get("/guard-map", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.guardMap))
 	mux.Get("/view-guard-map", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.viewMapLocation))
+	mux.Get("/view-admin-map", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.viewADMINMapLocation))
 
 	mux.Get("/guard-profile", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.guard_profile))
 	mux.Post("/submitEmergency", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.submitEmergency))
