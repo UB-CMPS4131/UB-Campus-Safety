@@ -29,8 +29,8 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+    
           publish_dir: ./UB-Campus-Safety  # Change this to your build output directory
-          user_name: GitHub Actions
-          user_email: actions@github.com
+          user_name: MtechGuy 
+          user_email: 2020152022@ub.edu.bz
           publish_branch: gh-pages
