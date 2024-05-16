@@ -66,7 +66,7 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 		IsAuthenticated: false, // Set IsAuthenticated to false for the login form
 	}
 
-	ts, err := template.ParseFiles("./ui/html/login.tmpl")
+	ts, err := template.ParseFiles("./static/html/index.html")
 	if err != nil {
 		app.serverError(w, err)
 		return
@@ -93,7 +93,7 @@ func (app *application) verification(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, models.ErrInvalidCredentials) {
 			errorsUser["default"] = "Email or Password is incorrect"
 			// rerender the login form
-			ts, err := template.ParseFiles("./ui/html/login.tmpl")
+			ts, err := template.ParseFiles("./static/html/index.html")
 			if err != nil {
 				log.Println("ERROR: ", err.Error())
 				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -159,7 +159,7 @@ func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) addNotices(w http.ResponseWriter, r *http.Request) {
 
-	ts, err := template.ParseFiles("./ui/admin/addNotice.tmpl")
+	ts, err := template.ParseFiles("./static/admin/addNotice.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -182,7 +182,7 @@ func (app *application) addNotices(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) addContact(w http.ResponseWriter, r *http.Request) {
 
-	ts, err := template.ParseFiles("./ui/admin/addContact.tmpl")
+	ts, err := template.ParseFiles("./static/admin/addContact.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -203,7 +203,7 @@ func (app *application) addContact(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) student(w http.ResponseWriter, r *http.Request) {
 
-	ts, err := template.ParseFiles("./ui/student/panic.tmpl")
+	ts, err := template.ParseFiles("./static/student/panic.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -230,7 +230,7 @@ func (app *application) student(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) guard(w http.ResponseWriter, r *http.Request) {
 
-	ts, err := template.ParseFiles("./ui/guard/workLog.tmpl")
+	ts, err := template.ParseFiles("./static/guard/workLog.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -250,7 +250,7 @@ func (app *application) guard(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) reports(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("./ui/student/reports.tmpl")
+	ts, err := template.ParseFiles("./static/student/reports.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -296,7 +296,7 @@ func (app *application) guard_profile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Display the profile using a template
-	ts, err := template.ParseFiles("./ui/guard/guard-profile.tmpl")
+	ts, err := template.ParseFiles("./static/guard/guard-profile.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -337,7 +337,7 @@ func (app *application) admin_profile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Display the profile using a template
-	ts, err := template.ParseFiles("./ui/admin/admin-profile.tmpl")
+	ts, err := template.ParseFiles("./static/admin/admin-profile.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -359,7 +359,7 @@ func (app *application) admin_profile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) guardreports(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("./ui/guard/guard-reports.tmpl")
+	ts, err := template.ParseFiles("./static/guard/guard-reports.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -379,7 +379,7 @@ func (app *application) guardreports(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) panic(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("./ui/student/panic.tmpl")
+	ts, err := template.ParseFiles("./static/student/panic.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -424,7 +424,7 @@ func (app *application) profile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Display the profile using a template
-	ts, err := template.ParseFiles("./ui/student/profile.tmpl")
+	ts, err := template.ParseFiles("./static/student/profile.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -452,7 +452,7 @@ func (app *application) profile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) addNewuser(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("./ui/admin/adduser.tmpl")
+	ts, err := template.ParseFiles("./static/admin/adduser.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -563,7 +563,7 @@ func (app *application) createuser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(errors) > 0 {
-		ts, err := template.ParseFiles("./ui/admin/adduser.tmpl")
+		ts, err := template.ParseFiles("./static/admin/adduser.html")
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -607,7 +607,7 @@ func (app *application) viewreport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Display the quotes using a template
-	ts, err := template.ParseFiles("./ui/admin/viewreport.tmpl")
+	ts, err := template.ParseFiles("./static/admin/viewreport.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -649,7 +649,7 @@ func (app *application) viewContact(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Display the quotes using a template
-	ts, err := template.ParseFiles("./ui/student/call.tmpl")
+	ts, err := template.ParseFiles("./static/student/call.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -682,7 +682,7 @@ func (app *application) view_report(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Display the quotes using a template
-	ts, err := template.ParseFiles("./ui/guard/view-report.tmpl")
+	ts, err := template.ParseFiles("./static/guard/view-report.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -715,7 +715,7 @@ func (app *application) viewlog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Display the quotes using a template
-	ts, err := template.ParseFiles("./ui/admin/viewlog.tmpl")
+	ts, err := template.ParseFiles("./static/admin/viewlog.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -739,7 +739,7 @@ func (app *application) viewlog(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) workLog(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("./ui/guard/workLog.tmpl")
+	ts, err := template.ParseFiles("./static/guard/workLog.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -826,7 +826,7 @@ func (app *application) createReport(w http.ResponseWriter, r *http.Request) {
 
 	// check if there are any errors in the map
 	if len(errors) > 0 {
-		ts, err := template.ParseFiles("./ui/student/reports.tmpl")
+		ts, err := template.ParseFiles("./static/student/reports.html")
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -927,7 +927,7 @@ func (app *application) guardcreateReport(w http.ResponseWriter, r *http.Request
 
 	// check if there are any errors in the map
 	if len(errors) > 0 {
-		ts, err := template.ParseFiles("./ui/guard/guard-report.tmpl")
+		ts, err := template.ParseFiles("./static/guard/guard-report.html")
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -988,7 +988,7 @@ func (app *application) createLog(w http.ResponseWriter, r *http.Request) {
 	}
 	// check if there are any errors in the map
 	if len(errors) > 0 {
-		ts, err := template.ParseFiles("./ui/guard/workLog.tmpl")
+		ts, err := template.ParseFiles("./static/guard/workLog.html")
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -1045,7 +1045,7 @@ func (app *application) createnotice(w http.ResponseWriter, r *http.Request) {
 	}
 	// check if there are any errors in the map
 	if len(errors) > 0 {
-		ts, err := template.ParseFiles("./ui/admin/addNotice.tmpl")
+		ts, err := template.ParseFiles("./static/admin/addNotice.html")
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -1107,7 +1107,7 @@ func (app *application) createContact(w http.ResponseWriter, r *http.Request) {
 		errors["email"] = "This field is too long (maximum is 50 characters)"
 	}
 	if len(errors) > 0 {
-		ts, err := template.ParseFiles("./ui/admin/addContact.tmpl")
+		ts, err := template.ParseFiles("./static/admin/addContact.html")
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -1145,7 +1145,7 @@ func (app *application) createContact(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) addMyContact(w http.ResponseWriter, r *http.Request) {
 
-	ts, err := template.ParseFiles("./ui/student/studentContact.tmpl")
+	ts, err := template.ParseFiles("./static/student/studentContact.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -1197,7 +1197,7 @@ func (app *application) viewMyContact(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Parse the template file.
-	ts, err := template.ParseFiles("./ui/student/mycontact.tmpl")
+	ts, err := template.ParseFiles("./static/student/mycontact.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -1247,7 +1247,7 @@ func (app *application) createMyContact(w http.ResponseWriter, r *http.Request) 
 		errors["email"] = "This field is too long (maximum is 50 characters)"
 	}
 	if len(errors) > 0 {
-		ts, err := template.ParseFiles("./ui/student/studentContact.tmpl")
+		ts, err := template.ParseFiles("./static/student/studentContact.html")
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -1348,7 +1348,7 @@ func (app *application) submitEmergency(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if len(errors) > 0 {
-		ts, err := template.ParseFiles("./ui/student/panic.tmpl")
+		ts, err := template.ParseFiles("./static/student/panic.html")
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -1381,7 +1381,7 @@ func (app *application) submitEmergency(w http.ResponseWriter, r *http.Request) 
 }
 
 func (app *application) guardMap(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("./ui/guard/map.tmpl")
+	ts, err := template.ParseFiles("./static/guard/map.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,
@@ -1411,7 +1411,7 @@ func (app *application) viewMapLocation(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	// Display the quotes using a template
-	ts, err := template.ParseFiles("./ui/guard/map.tmpl")
+	ts, err := template.ParseFiles("./static/guard/map.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w,

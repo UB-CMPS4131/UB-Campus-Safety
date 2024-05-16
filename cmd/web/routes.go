@@ -17,23 +17,6 @@ func (app *application) routes() http.Handler {
 	dynamicMiddleware := alice.New(app.session.Enable)
 
 	mux := pat.New()
-	// Serve HTML files
-	htmlDir := http.Dir("ui/html")
-	htmlFS := http.FileServer(htmlDir)
-	mux.Get("/html/", http.StripPrefix("/html/", htmlFS))
-
-	jsDir := http.Dir("ui/js")
-	jsFS := http.FileServer(jsDir)
-	mux.Get("/js/", http.StripPrefix("/js/", jsFS))
-
-	imgDir := http.Dir("ui/images")
-	imgFS := http.FileServer(imgDir)
-	mux.Get("/images/", http.StripPrefix("/images/", imgFS))
-
-	// Serve CSS files
-	cssDir := http.Dir("ui/css")
-	cssFS := http.FileServer(cssDir)
-	mux.Get("/css/", http.StripPrefix("/css/", cssFS))
 
 	mux.Get("/", dynamicMiddleware.ThenFunc(app.login))
 	mux.Post("/login", dynamicMiddleware.ThenFunc(app.verification))
@@ -69,9 +52,14 @@ func (app *application) routes() http.Handler {
 	mux.Get("/add-notice", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.addNotices))
 	mux.Get("/user/logout", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.logoutUser))
 
-	// Create a fileserver to serve our static content
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	mux.Get("/static/", http.StripPrefix("/static", fileServer))
+	cssFS := http.FileServer(http.Dir("./static/css"))
+	mux.Get("/css/", http.StripPrefix("/css/", cssFS))
+
+	jsFS := http.FileServer(http.Dir("./static/js"))
+	mux.Get("/js/", http.StripPrefix("/js/", jsFS))
+
+	imgFS := http.FileServer(http.Dir("./static/images"))
+	mux.Get("/images/", http.StripPrefix("/images/", imgFS))
 
 	return standardMiddleware.Then(mux)
 }

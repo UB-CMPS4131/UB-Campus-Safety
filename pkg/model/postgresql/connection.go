@@ -377,6 +377,7 @@ func (m *ConnectModel) ReadMapLocation() ([]*models.Map, error) {
 	s := `
     SELECT emergency_id, person_name, location, message
     FROM emergency
+	ORDER BY emergency_id DESC
     `
 	rows, err := m.DB.Query(s)
 	if err != nil {
