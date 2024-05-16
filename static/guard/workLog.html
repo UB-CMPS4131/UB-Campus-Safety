@@ -98,11 +98,11 @@
 	<div class="container">
 	<h2> Work Log Form </h2>
 	<form action="/create-log" id="logform" method="POST">
-		<label for="date">Select Date:</label><br>
-		<input type="date" id="date" name="date"><br><br>
+		<!-- <label for="date">Select Date:</label><br> -->
+		<input type="hidden" id="date" name="date"><br><br>
 	  
-		<label for="time">Select Time:</label><br>
-		<input type="time" id="time" name="time"><br><br>
+		<!-- <label for="time">Select Time:</label><br> -->
+		<input type="hidden" id="time" name="time"><br><br>
 	  
 		<label for="checkType">Select Check Type:</label><br>
 		<select id="checkType" name="checkType">
