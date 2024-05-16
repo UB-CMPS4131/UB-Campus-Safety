@@ -1,51 +1,25 @@
-name: Build and Deploy
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Go
 
 on:
   push:
-    branches:
-      - main  # Change this to your main branch name
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
+
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: '1.21.6'  # Change this to your Go version if needed
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21.6'
 
-      - name: Install dependencies
-        run: |
-          go mod tidy
-
-      - name: Build
-        run: |
-          go build -o myapp ./cmd/web  # Replace 'myapp' with your executable name and './cmd/myapp' with your main package path
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.PAT_TOKEN }}  # Use a Personal Access Token (PAT) instead of GITHUB_TOKEN
-          publish_dir: ./UB-Campus-Safety  # Change this to your build output directory
-          user_name: MtechGuy 
-          user_email: 2020152022@ub.edu.bz
-          publish_branch: gh-pages
+    - name: Build
+      run: go build -v ./...
