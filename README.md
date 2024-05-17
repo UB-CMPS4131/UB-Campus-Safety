@@ -5,7 +5,12 @@ The University of Belize grapples with a multifaceted challenge regarding the sa
 
 [![Build Status](https://github.com/UB-CMPS4131/UB-Campus-Safety/actions/workflows/jekyll-gh-pages.yml/badge.svg)](https://github.com/UB-CMPS4131/UB-Campus-Safety/blob/main/.github/workflows/jekyll-gh-pages.yml)
 
+
 [![Coverage Status](https://img.shields.io/codecov/c/github/UB-CMPS4131/UB-Campus-Safety.svg)](https://codecov.io/gh/UB-CMPS4131/UB-Campus-Safety)
+
+[![Download apk](https://img.shields.io/github/downloads/SoyTuJefe/Saito/total?color=%233DDC84&logo=android&logoColor=%23fff&style=for-the-badge)]()
+
+ <a href="https://github.com/UB-CMPS4131/UB-Campus-Safety/releases/download/v.1.0/app-release.apk"><img src="https://img.shields.io/github/downloads/SoyTuJefe/UB-Campus-Safety/total?color=%233DDC84&logo=android&logoColor=%23fff&style=for-the-badge"></a>
 
 
 
@@ -25,13 +30,14 @@ The University of Belize grapples with a multifaceted challenge regarding the sa
 - Add Notice
 - Add Contact
 - Add User
+- View Map
 - View Report
 - View Log
 - View Profile
 
 
 ### Student
-
+- Panic Button
 - Add a Report
 - View Contacts
 - view Profile
@@ -39,8 +45,8 @@ The University of Belize grapples with a multifaceted challenge regarding the sa
 
 
 ### Guard
-
-- Work Log
+- Add Work Log
+- View Map
 - Add a report
 - View report
 - View Profile
