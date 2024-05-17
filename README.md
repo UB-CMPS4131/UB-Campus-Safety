@@ -8,7 +8,7 @@ The University of Belize grapples with a multifaceted challenge regarding the sa
 
 [![Coverage Status](https://img.shields.io/codecov/c/github/UB-CMPS4131/UB-Campus-Safety.svg)](https://codecov.io/gh/UB-CMPS4131/UB-Campus-Safety)
 
-[![Downloads](https://img.shields.io/github/downloads/UB-CMPS4131/UB-Campus-Safety/total?color=%233DDC84&logo=android&logoColor=%23fff&style=for-the-badge)](https://github.com/UB-CMPS4131/UB-Campus-Safety/releases/tag/v.1.0)
+[![Downloads](https://img.shields.io/github/downloads/UB-CMPS4131/UB-Campus-Safety/total?color=%233DDC84&logo=android&logoColor=%23fff&style=for-the-badge)](https://github.com/UB-CMPS4131/UB-Campus-Safety/releases/download/v.1.0/app-release.apk)
 
 
 ## Introduction
