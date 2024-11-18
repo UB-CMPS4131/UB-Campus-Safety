@@ -5,6 +5,7 @@ package postgresql
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 
 	models "amencia.net/ubb-campus-safety-main/pkg/model"
 	"golang.org/x/crypto/bcrypt"
@@ -17,12 +18,12 @@ type UserModel struct {
 func (m *UserModel) Authenticate(username, password string) (int, error) {
 	var id int
 	var hashedPassword []byte
+	//var pwd string
 
 	s := `
 		SELECT id, password
 		FROM LOGIN
 		WHERE username = $1
-		AND activated = TRUE
 	`
 	err := m.DB.QueryRow(s, username).Scan(&id, &hashedPassword)
 	if err != nil {
@@ -32,7 +33,8 @@ func (m *UserModel) Authenticate(username, password string) (int, error) {
 			return 0, err
 		}
 	}
-	// check the password
+	fmt.Println("pwd")
+	//check the password
 	err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
@@ -41,6 +43,9 @@ func (m *UserModel) Authenticate(username, password string) (int, error) {
 			return 0, err
 		}
 	}
+
+	//fmt.Println("pwd")
+
 	return id, nil
 }
 
@@ -55,7 +60,6 @@ func (m *UserModel) FetchUserRoleAndIDAndUsername(id int) (string, int, int, int
 		SELECT id , username, role, memberID
 		FROM LOGIN
 		WHERE id = $1
-		AND activated = TRUE
 	`
 	err := m.DB.QueryRow(s, id).Scan(&LoginID, &username, &role, &memberID)
 
@@ -78,7 +82,6 @@ func (m *UserModel) FetchUserRoleAndID(id int) (int, int, int, error) {
 		SELECT id, role, memberID
 		FROM LOGIN
 		WHERE id = $1
-		AND activated = TRUE
 	`
 	err := m.DB.QueryRow(s, id).Scan(&LoginID, &role, &memberID)
 	if err != nil {

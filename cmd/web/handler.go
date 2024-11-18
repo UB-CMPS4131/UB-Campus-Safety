@@ -86,6 +86,7 @@ func (app *application) verification(w http.ResponseWriter, r *http.Request) {
 	}
 	username := r.PostForm.Get("username")
 	password := r.PostForm.Get("password")
+
 	// check the web form fields to validity
 	errorsUser := make(map[string]string)
 	id, err := app.users.Authenticate(username, password)
