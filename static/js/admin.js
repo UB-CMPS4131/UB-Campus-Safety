@@ -15,7 +15,6 @@ li_items.forEach((li_item)=>{
 	li_item.addEventListener("mouseleave", ()=>{
 
 			li_item.closest(".wrapper").classList.add("hover_collapse");
-ed
 
 	})
 })

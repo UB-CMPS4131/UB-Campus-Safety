@@ -13,11 +13,11 @@ RUN go mod download
 # Copy the entire source code into the container
 COPY . .
 
-# Build the application
-RUN go build -o ub
+# Build the application from the cmd directory
+RUN go build -o ub ./cmd/web
 
 # Document the port that may need to be published
 EXPOSE 8000
 
 # Start the application
-CMD ["/build/go-blog"]
+CMD ["./ub"]

@@ -1,0 +1,151 @@
+services:
+  app:
+    build:
+      context: .
+      network: host
+    container_name: go-app
+    environment:
+      PORT: ${PORT}
+      LOG_LEVEL: ${LOG_LEVEL}
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    env_file:
+      - ./.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - go-network
+    volumes:
+     - .:/app
+
+  caddy:
+    image: caddy
+    container_name: go-caddy
+    depends_on:
+      - app
+    ports:
+      - 80:80
+    volumes:
+      - caddy-config:/config
+      - caddy-data:/data
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    networks:
+      - go-network
+
+  postgres:
+    image: postgres:bookworm
+    restart: always
+    container_name: go-db
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: [CMD-SHELL, "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - 5433:5433
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    networks:
+      - go-network
+
+
+  migrate:
+    image: migrate/migrate
+    container_name: go-app-migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_USER: ub
+      POSTGRES_PASSWORD: ub
+      POSTGRES_DB: ub
+    networks:
+      - go-network
+    volumes:
+      - ./migrations:/migrations  # Mount the local ./migrations directory to /migrations in the container
+    command: ["-path", "/migrations", "-database", "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@go-db:5432/${POSTGRES_DB}?sslmode=disable", "up"]
+
+
+volumes:
+  pg-data:
+  caddy-config:
+  caddy-data:
+
+networks:
+  go-network:
+     driver: bridge
+
+
+# services:
+#   app:
+#     build:
+#       context: .
+#       network: host
+#     container_name: go-app
+#     environment:
+#       PORT: ${PORT}
+#       LOG_LEVEL: ${LOG_LEVEL}
+#       POSTGRES_HOST: ${POSTGRES_HOST}
+#       POSTGRES_DB: ${POSTGRES_DB}
+#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#       POSTGRES_USER: ${POSTGRES_USER}
+#     env_file:
+#       - ./.env
+#     depends_on:
+#       postgres:
+#         condition: service_healthy
+#     networks:
+#       - go-network
+
+#   caddy:
+#     image: caddy
+#     container_name: go-blog-caddy
+#     depends_on:
+#       - app
+#     ports:
+#       - 80:80
+#     volumes:
+#       - caddy-config:/config
+#       - caddy-data:/data
+#       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+#     networks:
+#       - go-network
+
+#   postgres:
+#     image: postgres:bookworm
+#     restart: always
+#     container_name: go-blog-db
+#     env_file:
+#       - ./.env
+#     environment:
+#       POSTGRES_USER: ${POSTGRES_USER}
+#       POSTGRES_DB: ${POSTGRES_DB}
+#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#     healthcheck:
+#       test: [CMD-SHELL, "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+#     ports:
+#       - 5432:5432
+#     volumes:
+#       - pg-data:/var/lib/postgresql/data
+#     networks:
+#       - go-network
+
+# volumes:
+#   pg-data:
+#   caddy-config:
+#   caddy-data:
+
+# networks:
+#   go-network:
