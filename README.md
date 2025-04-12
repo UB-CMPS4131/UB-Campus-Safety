@@ -47,3 +47,6 @@ The University of Belize grapples with a multifaceted challenge regarding the sa
 - View report
 - View Profile
 
+//docker build --network=host . -t ub-prod --target production
+
+//docker build --network=host . -t ub-prod

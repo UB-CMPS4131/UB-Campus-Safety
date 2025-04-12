@@ -43,7 +43,8 @@ type application struct {
 
 func main() {
 	addr := flag.String("addr", ":8080", "HTTP network address")
-	dsn := flag.String("dsn", "postgres://xqymnerr:Xgtj9QRe3ouBnLW1WN-9C_g4_DDWefMr@bubble.db.elephantsql.com/xqymnerr", "PostgreSQL DSN (Data Source Name)")
+	//using 5433 since im also using 5432 for local postgers, therefore 5433 in public maps to 5432 inside docker
+	dsn := flag.String("dsn", "postgres://ub:ub@go-db:5432/ub?sslmode=disable", "PostgreSQL DSN (Data Source Name)")
 	flag.Parse()
 	secret := flag.String("secret", "p7Mhd+qQamgHsS*+8Tg7mNXtcjvu@egz", "Secret key")
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)

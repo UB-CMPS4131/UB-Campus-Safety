@@ -1,6 +1,8 @@
 module amencia.net/ubb-campus-safety-main
 
-go 1.21.6
+go 1.22.0
+
+toolchain go1.23.1
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
@@ -10,8 +12,9 @@ require (
 	golang.org/x/crypto v0.23.0
 )
 
+require golang.org/x/sys v0.25.0 // indirect
+
 require (
 	github.com/bmizerany/pat v0.0.0-20210406213842-e4b6760bdd6f
 	github.com/justinas/alice v1.2.0
-	golang.org/x/sys v0.20.0 // indirect
 )
